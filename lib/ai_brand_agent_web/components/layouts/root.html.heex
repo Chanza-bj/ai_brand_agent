@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <meta
+      :if={assigns[:meta_description]}
+      name="description"
+      content={assigns[:meta_description]}
+    />
+    <link :if={assigns[:canonical_url]} rel="canonical" href={assigns[:canonical_url]} />
+    <meta :if={assigns[:canonical_url]} property="og:url" content={assigns[:canonical_url]} />
+    <meta property="og:type" content="website" />
+    <meta
+      :if={assigns[:page_title]}
+      property="og:title"
+      content={assigns[:page_title]}
+    />
+    <meta
+      :if={assigns[:meta_description]}
+      property="og:description"
+      content={assigns[:meta_description]}
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      :if={assigns[:page_title]}
+      name="twitter:title"
+      content={assigns[:page_title]}
+    />
+    <meta
+      :if={assigns[:meta_description]}
+      name="twitter:description"
+      content={assigns[:meta_description]}
+    />
+    <.live_title default="Brand Agent">
+      {assigns[:page_title]}
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
+    </script>
+  </head>
+  <body class="min-h-screen bg-base-100">
+    <nav class="navbar bg-base-200 border-b border-base-300 px-4">
+      <div class="flex-1">
+        <a href="/" class="text-xl font-bold text-primary">Brand Agent</a>
+      </div>
+      <div class="flex-none">
+        <%= if assigns[:current_user] do %>
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <a href="/dashboard" class="btn btn-ghost btn-sm">Dashboard</a>
+            <a href="/niches" class="btn btn-ghost btn-sm">Niches</a>
+            <a href="/brand" class="btn btn-ghost btn-sm">Brand</a>
+            <a href="/posts" class="btn btn-ghost btn-sm">Posts</a>
+            <a href="/posts/new" class="btn btn-ghost btn-sm">Compose</a>
+            <a href="/connections" class="btn btn-ghost btn-sm">Connections</a>
+            <a href="/agent" class="btn btn-ghost btn-sm">Agent</a>
+            <span class="text-sm text-base-content/60">{assigns[:current_user].name}</span>
+            <a href="/auth/logout" class="btn btn-ghost btn-sm text-error">Logout</a>
+          </div>
+        <% else %>
+          <a href="/auth/auth0" class="btn btn-primary btn-sm">Sign in</a>
+        <% end %>
+      </div>
+    </nav>
+
+    {@inner_content}
+  </body>
+</html>

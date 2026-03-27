@@ -1,0 +1,278 @@
+<Layouts.flash_group flash={@flash} />
+
+<div id="marketing-home" class="flex flex-col">
+  <%!-- Hero --%>
+  <section class="relative overflow-hidden border-b border-base-300/60">
+    <div
+      class="absolute inset-0 bg-gradient-to-br from-primary/10 via-base-100 to-accent/5 pointer-events-none"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="relative max-w-6xl mx-auto px-4 py-16 sm:py-24 lg:py-28">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div class="text-center lg:text-left">
+          <p class="marketing-hero-in marketing-hero-in--d1 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary mb-6">
+            <.icon name="hero-shield-check" class="w-4 h-4" />
+            Auth0 Token Vault for federated tokens
+          </p>
+
+          <h1 class="marketing-hero-in marketing-hero-in--d2 text-4xl sm:text-5xl font-bold tracking-tight text-base-content mb-4">
+            Personal brand, <span class="text-primary">on autopilot</span>
+          </h1>
+
+          <p class="marketing-hero-in marketing-hero-in--d3 text-lg text-base-content/75 mb-6 max-w-xl mx-auto lg:mx-0">
+            Anchor your content to the
+            <span class="font-medium text-base-content/85">keywords and themes</span>
+            that matter to your audience. Get topic angles and drafts tuned for discovery, then publish to LinkedIn and Facebook, without storing provider tokens in your app.
+            <span class="text-base-content/65">
+              Add your product or service on the Brand page when you want your offer reflected in the copy.
+            </span>
+          </p>
+
+          <div class="marketing-hero-in marketing-hero-in--d4 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-8">
+            <%= if @current_user do %>
+              <a
+                href={~p"/dashboard"}
+                class="btn btn-primary btn-lg rounded-xl shadow-lg shadow-primary/20 transition hover:scale-[1.02]"
+              >
+                <.icon name="hero-squares-2x2" class="w-5 h-5" /> Open dashboard
+              </a>
+              <a href={~p"/niches"} class="btn btn-outline btn-lg rounded-xl border-base-300">
+                <.icon name="hero-tag" class="w-5 h-5" /> Your niches
+              </a>
+            <% else %>
+              <a
+                href={~p"/auth/auth0"}
+                class="btn btn-primary btn-lg rounded-xl shadow-lg shadow-primary/20 transition hover:scale-[1.02]"
+              >
+                Get started
+              </a>
+              <a href="#how-it-works" class="btn btn-outline btn-lg rounded-xl border-base-300">
+                How it works
+              </a>
+            <% end %>
+          </div>
+
+          <p class="marketing-hero-in marketing-hero-in--d5 text-xs text-base-content/45 max-w-md mx-auto lg:mx-0">
+            Built for creators and founders who want consistent presence without juggling five tools.
+          </p>
+        </div>
+
+        <%!-- Product-style preview (decorative) --%>
+        <div
+          class="marketing-hero-in marketing-hero-in--d6 relative mx-auto w-full max-w-md lg:max-w-none"
+          aria-hidden="true"
+        >
+          <div class="rounded-2xl border border-base-300 bg-base-200/80 backdrop-blur-sm shadow-2xl shadow-black/20 p-5 sm:p-6">
+            <div class="flex items-center justify-between border-b border-base-300 pb-3 mb-4">
+              <span class="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+                Today
+              </span>
+              <span class="flex gap-1">
+                <span class="w-2 h-2 rounded-full bg-error/80"></span>
+                <span class="w-2 h-2 rounded-full bg-warning/80"></span>
+                <span class="w-2 h-2 rounded-full bg-success/80"></span>
+              </span>
+            </div>
+            <div class="space-y-3">
+              <div class="flex gap-3 rounded-xl bg-base-300/40 p-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
+                  <.icon name="hero-signal" class="w-5 h-5" />
+                </div>
+                <div class="min-w-0 flex-1 text-left">
+                  <p class="text-xs text-base-content/45">Topic idea</p>
+                  <p class="text-sm font-medium text-base-content truncate">
+                    Niches &amp; keywords &rarr; angles on a schedule
+                  </p>
+                </div>
+              </div>
+              <div class="flex gap-3 rounded-xl bg-base-300/40 p-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/20 text-accent">
+                  <.icon name="hero-pencil-square" class="w-5 h-5" />
+                </div>
+                <div class="min-w-0 flex-1 text-left">
+                  <p class="text-xs text-base-content/45">Draft</p>
+                  <p class="text-sm font-medium text-base-content line-clamp-2">
+                    Copy shaped for each network and your keywords. You edit before it ships.
+                  </p>
+                </div>
+              </div>
+              <div class="flex gap-3 rounded-xl bg-base-300/40 p-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-success/20 text-success">
+                  <.icon name="hero-paper-airplane" class="w-5 h-5" />
+                </div>
+                <div class="min-w-0 flex-1 text-left">
+                  <p class="text-xs text-base-content/45">Publish</p>
+                  <p class="text-sm font-medium text-base-content">
+                    OAuth via Auth0. Tokens stay in the vault.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%!-- How it works --%>
+  <section id="how-it-works" class="max-w-6xl mx-auto px-4 py-16 sm:py-20 scroll-mt-20">
+    <div class="marketing-scroll-reveal" data-scroll-reveal>
+      <h2 class="text-2xl sm:text-3xl font-bold text-center text-base-content mb-3">
+        How it works
+      </h2>
+      <p class="text-center text-base-content/60 mb-12 max-w-2xl mx-auto">
+        You define niches and keyword focus. The app proposes angles, helps draft copy you can refine, and routes publishing through Auth0.
+      </p>
+    </div>
+
+    <ol class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <li
+        class="marketing-scroll-reveal relative text-center md:text-left"
+        data-scroll-reveal
+        style="--marketing-reveal-delay: 0ms"
+      >
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold mx-auto md:mx-0 mb-3">
+          1
+        </span>
+        <h3 class="font-semibold text-base-content mb-2">Niches &amp; keywords</h3>
+        <p class="text-sm text-base-content/60">
+          Add phrases and themes you want to own. They drive suggested topic titles on a schedule (and when you save a niche).
+        </p>
+      </li>
+      <li
+        class="marketing-scroll-reveal relative text-center md:text-left"
+        data-scroll-reveal
+        style="--marketing-reveal-delay: 120ms"
+      >
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold mx-auto md:mx-0 mb-3">
+          2
+        </span>
+        <h3 class="font-semibold text-base-content mb-2">Drafts</h3>
+        <p class="text-sm text-base-content/60">
+          Starting points tuned to LinkedIn or Facebook and your focus terms. You review, rewrite, or start from a blank page.
+        </p>
+      </li>
+      <li
+        class="marketing-scroll-reveal relative text-center md:text-left"
+        data-scroll-reveal
+        style="--marketing-reveal-delay: 240ms"
+      >
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold mx-auto md:mx-0 mb-3">
+          3
+        </span>
+        <h3 class="font-semibold text-base-content mb-2">Publish</h3>
+        <p class="text-sm text-base-content/60">
+          Connect LinkedIn and Facebook. Federated access for Google flows through Auth0 Token Vault where appropriate.
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <%!-- Feature cards --%>
+  <section class="border-y border-base-300/60 bg-base-200/30">
+    <div class="max-w-6xl mx-auto px-4 py-16 sm:py-20">
+      <div class="marketing-scroll-reveal" data-scroll-reveal>
+        <h2 class="text-2xl sm:text-3xl font-bold text-center text-base-content mb-3">
+          What you get
+        </h2>
+        <p class="text-center text-base-content/60 mb-12 max-w-2xl mx-auto">
+          From the terms you care about to posts your audience can find: one workflow.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div
+          class="marketing-scroll-reveal rounded-2xl border border-base-300 bg-base-200/50 p-6 transition hover:border-primary/40 hover:shadow-lg"
+          data-scroll-reveal
+          style="--marketing-reveal-delay: 0ms"
+        >
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary">
+            <.icon name="hero-bolt" class="w-6 h-6" />
+          </div>
+          <h3 class="font-semibold text-lg text-base-content mb-2">Niche &amp; topic ideas</h3>
+          <p class="text-sm text-base-content/60 leading-relaxed">
+            Seeds drive scheduled discovery. Topics stay tied to your positioning so content stays consistent.
+          </p>
+        </div>
+
+        <div
+          class="marketing-scroll-reveal rounded-2xl border border-base-300 bg-base-200/50 p-6 transition hover:border-primary/40 hover:shadow-lg"
+          data-scroll-reveal
+          style="--marketing-reveal-delay: 140ms"
+        >
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/15 text-accent">
+            <.icon name="hero-magnifying-glass" class="w-6 h-6" />
+          </div>
+          <h3 class="font-semibold text-lg text-base-content mb-2">Keyword-aware copy</h3>
+          <p class="text-sm text-base-content/60 leading-relaxed">
+            Drafts lean on your niches and brand context so posts read like you, not a template. Edit every line before it goes live.
+          </p>
+        </div>
+
+        <div
+          class="marketing-scroll-reveal rounded-2xl border border-base-300 bg-base-200/50 p-6 transition hover:border-primary/40 hover:shadow-lg"
+          data-scroll-reveal
+          style="--marketing-reveal-delay: 280ms"
+        >
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-success/15 text-success">
+            <.icon name="hero-lock-closed" class="w-6 h-6" />
+          </div>
+          <h3 class="font-semibold text-lg text-base-content mb-2">Secure publishing</h3>
+          <p class="text-sm text-base-content/60 leading-relaxed">
+            Auth0 handles OAuth and Token Vault for federated tokens so your app is not the long-term secret store.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%!-- Trust strip --%>
+  <section class="marketing-scroll-reveal max-w-6xl mx-auto px-4 py-12" data-scroll-reveal>
+    <div class="flex flex-col sm:flex-row gap-6 sm:gap-10 items-center justify-center text-center sm:text-left">
+      <div class="flex items-center gap-3 text-sm text-base-content/70">
+        <.icon name="hero-check-badge" class="w-8 h-8 text-primary shrink-0" />
+        <div class="text-left">
+          <p class="font-medium text-base-content">Auth0 for identity</p>
+          <p class="text-xs text-base-content/50">
+            Login, connections, and Token Vault for secure publishing
+          </p>
+        </div>
+      </div>
+      <div class="hidden sm:block w-px h-10 bg-base-300" aria-hidden="true"></div>
+      <div class="flex items-center gap-3 text-sm text-base-content/70">
+        <.icon name="hero-pencil-square" class="w-8 h-8 text-accent shrink-0" />
+        <div class="text-left">
+          <p class="font-medium text-base-content">Your voice, your edit</p>
+          <p class="text-xs text-base-content/50">Nothing ships until you approve it</p>
+        </div>
+      </div>
+      <div class="hidden sm:block w-px h-10 bg-base-300" aria-hidden="true"></div>
+      <div class="flex items-center gap-3 text-sm text-base-content/70">
+        <.icon name="hero-queue-list" class="w-8 h-8 text-success shrink-0" />
+        <div class="text-left">
+          <p class="font-medium text-base-content">Oban + Phoenix</p>
+          <p class="text-xs text-base-content/50">Reliable background jobs</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%!-- Footer --%>
+  <footer class="mt-auto border-t border-base-300 bg-base-200/40">
+    <div
+      class="marketing-scroll-reveal max-w-6xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between"
+      data-scroll-reveal
+    >
+      <div class="text-sm text-base-content/50">
+        &copy; {Date.utc_today().year} Brand Agent. All rights reserved.
+      </div>
+      <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        <a href="#" class="text-base-content/60 hover:text-primary transition">Privacy</a>
+        <a href="#" class="text-base-content/60 hover:text-primary transition">Terms</a>
+        <a href="#" class="text-base-content/60 hover:text-primary transition">Contact</a>
+      </nav>
+    </div>
+  </footer>
+</div>
