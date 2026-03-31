@@ -55,8 +55,7 @@ end
 # Auth0 Token Vault - RSA private key for Privileged Worker JWT signing
 # Use AUTH0_TOKEN_VAULT_PRIVATE_KEY (PEM string) or AUTH0_TOKEN_VAULT_PRIVATE_KEY_PATH (file path)
 token_vault_config =
-  case {Env.get("AUTH0_TOKEN_VAULT_PRIVATE_KEY"),
-        Env.get("AUTH0_TOKEN_VAULT_PRIVATE_KEY_PATH")} do
+  case {Env.get("AUTH0_TOKEN_VAULT_PRIVATE_KEY"), Env.get("AUTH0_TOKEN_VAULT_PRIVATE_KEY_PATH")} do
     {pk, _} when is_binary(pk) -> [private_key: pk]
     {_, path} when is_binary(path) -> [private_key_path: path]
     _ -> nil
@@ -128,18 +127,71 @@ if config_env() == :prod do
 
   host = Env.get("PHX_HOST") || "example.com"
 
+  # Browser-facing URL for `Routes.*_url`, flashes, Auth0 `redirect_uri`, etc.
+  # Default: https://PHX_HOST:443 (TLS at reverse proxy).
+  # For UAT over plain HTTP, e.g. http://SERVER_IP:4002:
+  #   PHX_PUBLIC_SCHEME=http  (+ PHX_HOST / PORT); omit PHX_PUBLIC_PORT to reuse PORT.
+  url_scheme =
+    case Env.get("PHX_PUBLIC_SCHEME") do
+      nil -> "https"
+      s -> s |> String.trim() |> String.downcase()
+    end
+
+  url_scheme = if url_scheme in ["http", "https"], do: url_scheme, else: "https"
+
+  default_public_port = fn ->
+    if url_scheme == "https" do
+      443
+    else
+      case Env.get("PORT") do
+        p when is_binary(p) ->
+          case String.trim(p) do
+            "" -> 80
+            t -> String.to_integer(t)
+          end
+
+        _ ->
+          80
+      end
+    end
+  end
+
+  url_port =
+    case Env.get("PHX_PUBLIC_PORT") do
+      p when is_binary(p) ->
+        case String.trim(p) do
+          "" -> default_public_port.()
+          t -> String.to_integer(t)
+        end
+
+      _ ->
+        default_public_port.()
+    end
+
+  endpoint_opts =
+    [
+      url: [host: host, port: url_port, scheme: url_scheme],
+      http: [
+        # Enable IPv6 and bind on all interfaces.
+        # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
+        # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
+        # for details about using IPv6 vs IPv4 and loopback vs public addresses.
+        ip: {0, 0, 0, 0, 0, 0, 0, 0}
+      ],
+      secret_key_base: secret_key_base
+    ]
+    |> then(fn opts ->
+      if url_scheme == "http" do
+        # prod.exs enables force_ssl; disable when serving HTTP directly (IP:port UAT).
+        Keyword.put(opts, :force_ssl, false)
+      else
+        opts
+      end
+    end)
+
   config :ai_brand_agent, :dns_cluster_query, Env.get("DNS_CLUSTER_QUERY")
 
-  config :ai_brand_agent, AiBrandAgentWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
-    http: [
-      # Enable IPv6 and bind on all interfaces.
-      # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
-      # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
-      # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0}
-    ],
-    secret_key_base: secret_key_base
+  config :ai_brand_agent, AiBrandAgentWeb.Endpoint, endpoint_opts
 
   # ## SSL Support
   #

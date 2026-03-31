@@ -11,6 +11,9 @@ config :ai_brand_agent, AiBrandAgentWeb.Endpoint,
 # Force using SSL in production. This also sets the "strict-security-transport" header,
 # known as HSTS. If you have a health check endpoint, you may want to exclude it below.
 # Note `:force_ssl` is required to be set at compile-time.
+#
+# For plain-HTTP UAT (e.g. http://SERVER_IP:4002), set PHX_PUBLIC_SCHEME=http in runtime.exs;
+# that disables force_ssl at runtime so Plug.SSL does not redirect.
 config :ai_brand_agent, AiBrandAgentWeb.Endpoint,
   force_ssl: [
     rewrite_on: [:x_forwarded_proto],
