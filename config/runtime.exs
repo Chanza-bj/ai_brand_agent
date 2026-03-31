@@ -168,26 +168,32 @@ if config_env() == :prod do
         default_public_port.()
     end
 
-  endpoint_opts =
-    [
-      url: [host: host, port: url_port, scheme: url_scheme],
-      http: [
-        # Enable IPv6 and bind on all interfaces.
-        # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
-        # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
-        # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-        ip: {0, 0, 0, 0, 0, 0, 0, 0}
-      ],
-      secret_key_base: secret_key_base
-    ]
-    |> then(fn opts ->
-      if url_scheme == "http" do
-        # prod.exs enables force_ssl; disable when serving HTTP directly (IP:port UAT).
-        Keyword.put(opts, :force_ssl, false)
-      else
-        opts
-      end
-    end)
+  force_ssl =
+    if url_scheme == "http" do
+      # Plain HTTP (e.g. http://IP:PORT UAT); no redirect to HTTPS.
+      false
+    else
+      # TLS at reverse proxy; trust X-Forwarded-Proto.
+      [
+        rewrite_on: [:x_forwarded_proto],
+        exclude: [
+          hosts: ["localhost", "127.0.0.1"]
+        ]
+      ]
+    end
+
+  endpoint_opts = [
+    url: [host: host, port: url_port, scheme: url_scheme],
+    http: [
+      # Enable IPv6 and bind on all interfaces.
+      # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
+      # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
+      # for details about using IPv6 vs IPv4 and loopback vs public addresses.
+      ip: {0, 0, 0, 0, 0, 0, 0, 0}
+    ],
+    secret_key_base: secret_key_base,
+    force_ssl: force_ssl
+  ]
 
   config :ai_brand_agent, :dns_cluster_query, Env.get("DNS_CLUSTER_QUERY")
 

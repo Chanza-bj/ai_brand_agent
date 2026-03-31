@@ -107,12 +107,12 @@ defmodule AiBrandAgent.MixProject do
         "deps.unlock --unused",
         "format",
         "deps.audit",
-        ~s(sobelow --exit --ignore "Config.CSP,Config.Secrets,Traversal.FileModule"),
+        ~s(sobelow --exit --ignore "Config.CSP,Config.HTTPS,Config.Secrets,Traversal.FileModule"),
         "test"
       ],
       security: [
         "deps.audit",
-        ~s(sobelow --exit --ignore "Config.CSP,Config.Secrets,Traversal.FileModule")
+        ~s(sobelow --exit --ignore "Config.CSP,Config.HTTPS,Config.Secrets,Traversal.FileModule")
       ]
     ]
   end

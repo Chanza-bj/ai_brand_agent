@@ -124,8 +124,11 @@
 #   - Masking is not needed for file type variables see GitLab docs:
 #     https://docs.gitlab.com/ci/jobs/ssh_keys/?utm_source=chatgpt.com#add-an-ssh-key-as-a-file-type-variable
 #
-# Step 4: Create Deployments Directory on Server
-#   $ ssh SERVER_USER@SERVER_HOST "mkdir -p ~/deployments"
+# Step 4: Install deploy script on server (once) — see deploy/scripts/deploy_ai_brand_agent
+#   $ mkdir -p ~/deployments/scripts
+#   (copy that file from repo) $ scp deploy/scripts/deploy_ai_brand_agent SERVER_USER@SERVER_HOST:~/deployments/scripts/
+#   $ ssh SERVER_USER@SERVER_HOST "chmod +x ~/deployments/scripts/deploy_ai_brand_agent"
+#   Optional: sudoers NOPASSWD for systemctl restart ai-brand-agent.service (see script comments).
 #
 # Documentation Reference:
 # - GitLab CI/CD: https://docs.gitlab.com/ci/yaml/#inheritdefault

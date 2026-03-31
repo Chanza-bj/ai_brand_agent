@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Install on server (once):
+#   mkdir -p ~/deployments/scripts
+#   cp deploy_ai_brand_agent ~/deployments/scripts/
+#   chmod +x ~/deployments/scripts/deploy_ai_brand_agent
+#
+# Requires passwordless sudo for systemctl, e.g. /etc/sudoers.d/deploy-ai-brand-agent:
+#   deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart ai-brand-agent.service, /bin/systemctl status ai-brand-agent.service
+#
+# Expects ~/ai_brand_agent.tar.gz (GitLab CI scp) and expands to ~/ai_brand_agent (matches systemd WorkingDirectory).
+
+set -euo pipefail
+
+TARBALL="${HOME}/ai_brand_agent.tar.gz"
+TARGET="${HOME}/ai_brand_agent"
+
+if [[ ! -f "$TARBALL" ]]; then
+  echo "error: missing ${TARBALL}"
+  exit 1
+fi
+
+cd "${HOME}"
+
+if [[ -d "${TARGET}" ]]; then
+  rm -rf "${TARGET}.bak"
+  mv "${TARGET}" "${TARGET}.bak"
+fi
+
+tar -xzf "${TARBALL}"
+
+if [[ ! -x "${TARGET}/bin/ai_brand_agent" ]]; then
+  echo "error: missing ${TARGET}/bin/ai_brand_agent after extract"
+  exit 1
+fi
+
+chmod +x "${TARGET}/bin/ai_brand_agent" 2>/dev/null || true
+
+if [[ "${SKIP_SYSTEMD_RESTART:-0}" == "1" ]]; then
+  echo "SKIP_SYSTEMD_RESTART=1 — not restarting service"
+  exit 0
+fi
+
+sudo systemctl restart ai-brand-agent.service
+echo "Deployed and restarted ai-brand-agent.service"

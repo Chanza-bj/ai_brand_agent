@@ -136,7 +136,7 @@ defmodule AiBrandAgentWeb.DashboardLive do
           <% end %>
         </p>
       </div>
-
+      
     <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
         <div class="card bg-base-200 p-4">
@@ -210,7 +210,7 @@ defmodule AiBrandAgentWeb.DashboardLive do
             View all posts &rarr;
           </.link>
         </div>
-
+        
     <!-- Niches + topic ideas -->
         <div>
           <div class="mb-6">
