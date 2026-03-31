@@ -136,7 +136,7 @@ defmodule AiBrandAgentWeb.DashboardLive do
           <% end %>
         </p>
       </div>
-      
+
     <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
         <div class="card bg-base-200 p-4">
@@ -182,7 +182,7 @@ defmodule AiBrandAgentWeb.DashboardLive do
         <div class="lg:col-span-2">
           <h2 class="text-xl font-semibold mb-4">Recent Posts</h2>
           <div :if={@posts == []} class="text-base-content/50 italic">
-            No posts yet. Add <.link navigate={~p"/niches"} class="link">niches</.link>
+            No posts yet. Add <.link navigate={~p"/niches"} class="link">nichess</.link>
             for AI drafts or <.link navigate={~p"/posts/new"} class="link">compose</.link>
             your own.
           </div>
@@ -210,7 +210,7 @@ defmodule AiBrandAgentWeb.DashboardLive do
             View all posts &rarr;
           </.link>
         </div>
-        
+
     <!-- Niches + topic ideas -->
         <div>
           <div class="mb-6">
