@@ -1,49 +1,341 @@
-# This file is a template, and might need editing before it works on your project.
-# This is a sample GitLab CI/CD configuration file that should run without any modifications.
-# It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
-# it uses echo commands to simulate the pipeline execution.
-#
-# A pipeline is composed of independent jobs that run scripts, grouped into stages.
-# Stages run in sequential order, but jobs within stages run in parallel.
-#
-# For more information, see: https://docs.gitlab.com/ee/ci/yaml/#stages
-#
-# You can copy and paste this template into a new `.gitlab-ci.yml` file.
-# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
-#
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/development/cicd/templates/
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
+# # This file is a template, and might need editing before it works on your project.
+# # This is a sample GitLab CI/CD configuration file that should run without any modifications.
+# # It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
+# # it uses echo commands to simulate the pipeline execution.
+# #
+# # A pipeline is composed of independent jobs that run scripts, grouped into stages.
+# # Stages run in sequential order, but jobs within stages run in parallel.
+# #
+# # For more information, see: https://docs.gitlab.com/ee/ci/yaml/#stages
+# #
+# # You can copy and paste this template into a new `.gitlab-ci.yml` file.
+# # You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
+# #
+# # To contribute improvements to CI/CD templates, please follow the Development guide at:
+# # https://docs.gitlab.com/development/cicd/templates/
+# # This specific template is located at:
+# # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
-stages:          # List of stages for jobs, and their order of execution
-  - build
+# stages:          # List of stages for jobs, and their order of execution
+#   - build
+#   - test
+#   - deploy
+
+# build-job:       # This job runs in the build stage, which runs first.
+#   stage: build
+#   script:
+#     - echo "Compiling the code..."
+#     - echo "Compile complete."
+
+# unit-test-job:   # This job runs in the test stage.
+#   stage: test    # It only starts when the job in the build stage completes successfully.
+#   script:
+#     - echo "Running unit tests... This will take about 60 seconds."
+#     - sleep 60
+#     - echo "Code coverage is 90%"
+
+# lint-test-job:   # This job also runs in the test stage.
+#   stage: test    # It can run at the same time as unit-test-job (in parallel).
+#   script:
+#     - echo "Linting code... This will take about 10 seconds."
+#     - sleep 10
+#     - echo "No lint issues found."
+
+# deploy-job:      # This job runs in the deploy stage.
+#   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+#   environment: production
+#   script:
+#     - echo "Deploying application..."
+#     - echo "Application successfully deployed."
+
+
+# =============================================================================
+# GitLab CI/CD Pipeline for Elixir/Phoenix Application
+# =============================================================================
+#
+# Canonical CI config: GitLab loads `.gitlab-ci.yml` at the repo root only.
+# Do not maintain a separate `gitlab-ci.yml` (no dot) — it is ignored by default.
+#
+# PIPELINE FLOW
+# -------------
+#
+#   ┌─────────────┐     ┌─────────────┐     ┌─────────────────┐
+#   │    Test     │────►│    Build    │────►│     Deploy      │
+#   │(all branches)     │(all branches)     │  (main only)    │
+#   └─────────────┘     └─────────────┘     └─────────────────┘
+#
+# - Test: Runs mix test on all branches
+# - Build: Compiles and creates release on all branches
+# - Deploy: Copies release to server (only on main branch)
+#
+# PREREQUISITES: SSH Keys and Environment Variables Setup
+# --------------------------------------------------------
+#
+# Step 1: Generate SSH Key Pair (on your local machine)
+#   Run this command to create a new SSH key:
+#   $ ssh-keygen -t ed25519 -C "gitlab-ci-deploy" -f ~/.ssh/gitlab_deploy
+#
+#   This creates two files:
+#   - ~/.ssh/gitlab_deploy (private key)
+#   - ~/.ssh/gitlab_deploy.pub (public key)
+#
+# Step 2: Add Public Key to Target Server
+#   A. Copy the public key to your clipboard:
+#      $ cat ~/.ssh/gitlab_deploy.pub
+#
+#   B. SSH into your target server:
+#      $ ssh SERVER_USER@SERVER_HOST
+#
+#   C. Create the .ssh directory (if it doesn't exist):
+#      $ mkdir -p ~/.ssh
+#      $ chmod 700 ~/.ssh
+#
+#   D. Add the public key to authorized_keys:
+#      $ nano ~/.ssh/authorized_keys
+#      (paste the public key, save and exit)
+#
+#   E. Set correct permissions:
+#      $ chmod 600 ~/.ssh/authorized_keys
+#
+#   F. Exit the server and verify it works:
+#      $ exit
+#      $ ssh -i ~/.ssh/gitlab_deploy SERVER_USER@SERVER_HOST "echo 'SSH connection successful'"
+#
+# Step 3: Add Private Key to GitLab CI/CD Variables
+#   1. Go to your GitLab project: Settings → CI/CD → Variables
+#   2. Click "Add variable"
+#   3. Add the following variables:
+#
+#   | Key              | Value                              | Type     | Protected | Masked |
+#   |------------------|----------------------------------- |----------|-----------|--------|
+#   | SSH_PRIVATE_KEY  | (contents of ~/.ssh/gitlab_deploy) | File     | No        | No     |
+#   | SERVER_HOST      | your.server.com or 192.168.x.x     | Variable | No        | No     |
+#   | SERVER_USER      | deploy (your SSH username)         | Variable | No        | No     |
+#   | SECRET_KEY_BASE  | (run: mix phx.gen.secret)          | Variable | No        | Yes    |
+#   | CLOAK_KEY        | (generate a random 32-byte key)    | Variable | No        | Yes    |
+#
+#   To get your private key contents:
+#   $ cat ~/.ssh/gitlab_deploy
+#
+#   IMPORTANT: 
+#   - Include the full key with headers (-----BEGIN OPENSSH PRIVATE KEY-----)
+#   - Set SSH_PRIVATE_KEY type to "File", not "Variable"
+#   - Uncheck "Protected" if you want to run on non-protected branches
+#   - Masking is not needed for file type variables see GitLab docs:
+#     https://docs.gitlab.com/ci/jobs/ssh_keys/?utm_source=chatgpt.com#add-an-ssh-key-as-a-file-type-variable
+#
+# Step 4: Create Deployments Directory on Server
+#   $ ssh SERVER_USER@SERVER_HOST "mkdir -p ~/deployments"
+#
+# Documentation Reference:
+# - GitLab CI/CD: https://docs.gitlab.com/ci/yaml/#inheritdefault
+# =============================================================================
+
+stages:
   - test
+  - build
   - deploy
 
-build-job:       # This job runs in the build stage, which runs first.
+# Global cache configuration (shared by test and build jobs)
+default:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure      # Runner crashed
+      - stuck_or_timeout_failure   # Build timed out
+      - script_failure             # Network issues downloading deps
+      - unknown_failure            # Unknown errors
+      - api_failure                # GitLab API issues
+  cache:
+    key:
+      files:
+        - mix.lock
+    paths:
+      - deps/
+      - _build/
+
+# 1️⃣ Run Tests
+test:
+  stage: test
+  image: "hexpm/elixir:1.18.4-erlang-27.3.4.4-ubuntu-noble-20251001"
+
+  # Add PostgreSQL service
+  services:
+    - postgres:15-alpine
+  
+  variables:
+    MIX_ENV: test
+    # PostgreSQL service configuration
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+
+    # App's database variables
+    DB_USERNAME: postgres
+    DB_PASSWORD: postgres
+    DB_HOST: postgres
+  before_script:
+    # Update system packages
+    - echo "Updating system packages..."
+    - apt-get update -y
+    # Check if CA certificates exist (required for SSL/TLS)
+    - |
+      if [ ! -f /etc/ssl/certs/ca-certificates.crt ] && [ ! -d /etc/ssl/certs ]; then
+        echo "CA certificates not found, installing..."
+        apt-get install -y ca-certificates
+      else
+        echo "CA certificates already present"
+      fi
+    # Install git and curl (original working approach)
+    - apt-get install -y git curl
+    - echo "✅ System packages updated"
+    
+    # Install Hex and Rebar
+    - echo "Installing Hex and Rebar..."
+    - mix local.hex --force
+    - mix local.rebar --force
+    - echo "✅ Hex and Rebar installed"
+  script:
+    # Fetch dependencies
+    - echo "Fetching dependencies..."
+    - mix deps.get
+    - echo "✅ Dependencies fetched"
+    
+    # Compile for test
+    - echo "Compiling for test..."
+    - mix compile --force
+    - echo "✅ Compilation complete"
+
+    # Setup database (create, migrate, and seed)
+    - echo "Setting up test database..."
+    - mix ecto.setup
+    - echo "✅ Database ready"
+
+    # Run tests
+    - echo "Running tests..."
+    - mix test
+    - echo "✅ Tests passed!"
+
+# 2️⃣ Build the Elixir Release
+build_release:
   stage: build
+  image: "hexpm/elixir:1.18.4-erlang-27.3.4.4-ubuntu-noble-20251001"
+  variables:
+    MIX_ENV: prod
+    SECRET_KEY_BASE: $SECRET_KEY_BASE
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  before_script:
+    # Update system packages
+    - echo "Updating system packages..."
+    - apt-get update -y
+    # Check if CA certificates exist (required for SSL/TLS)
+    - |
+      if [ ! -f /etc/ssl/certs/ca-certificates.crt ] && [ ! -d /etc/ssl/certs ]; then
+        echo "CA certificates not found, installing..."
+        apt-get install -y ca-certificates
+      else
+        echo "CA certificates already present"
+      fi
+    # Install git and curl (original working approach)
+    - apt-get install -y git curl
+    - echo "✅ System packages updated"
+    
+    # Install Hex and Rebar
+    - echo "Installing Hex and Rebar..."
+    - mix local.hex --force
+    - mix local.rebar --force
+    - echo "✅ Hex and Rebar installed"
   script:
-    - echo "Compiling the code..."
-    - echo "Compile complete."
+    # Fetch dependencies
+    - echo "Fetching dependencies..."
+    - mix deps.get --only prod
+    - echo "✅ Dependencies fetched"
+    
+    # Compile dependencies
+    - echo "Compiling dependencies..."
+    - mix deps.compile
+    - echo "✅ Dependencies compiled"
 
-unit-test-job:   # This job runs in the test stage.
-  stage: test    # It only starts when the job in the build stage completes successfully.
-  script:
-    - echo "Running unit tests... This will take about 60 seconds."
-    - sleep 60
-    - echo "Code coverage is 90%"
+    # Compile app
+    - echo "Compiling application..."
+    - mix compile
+    - echo "✅ Application compiled"
 
-lint-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
-  script:
-    - echo "Linting code... This will take about 10 seconds."
-    - sleep 10
-    - echo "No lint issues found."
+    # Compile assets
+    - echo "Compiling assets..."
+    - mix assets.deploy
+    - echo "✅ Assets compiled"
 
-deploy-job:      # This job runs in the deploy stage.
-  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
-  environment: production
+    # Build the release
+    - echo "Building release..."
+    - mix release --overwrite
+    - echo "✅ Release built!"
+  artifacts:
+    paths:
+      - _build/prod/rel/ai_brand_agent/
+    expire_in: 1 hour
+
+# 3️⃣ Deploy the Release to Server
+deploy_release:
+  stage: deploy
+  image: alpine:latest
+  dependencies:
+    - build_release
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  cache: []  # Disable cache for deploy job (not needed)
+  inherit:
+    default: false
+  before_script:
+    # Install SSH client
+    - echo "Installing SSH client..."
+    - apk add --no-cache openssh-client
+    - echo "✅ SSH client installed"
+    
+    # Create SSH directory with secure permissions
+    - echo "Setting up SSH directory..."
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "✅ SSH directory ready"
+    
+    # Copy private key from GitLab CI variable
+    - echo "Configuring SSH key..."
+    - |
+      if [ -z "$SSH_PRIVATE_KEY" ]; then
+        echo "ERROR: SSH_PRIVATE_KEY environment variable is not set!"
+        echo "Please configure it in GitLab Settings CI/CD Variables"
+        echo "Set it as a File type variable with your SSH private key contents"
+        exit 1
+      fi
+    - cp "$SSH_PRIVATE_KEY" ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - echo "✅ SSH key configured"
+    
+    # Add server to known hosts to avoid host verification prompt
+    - echo "Adding server to known hosts..."
+    - ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts || echo "❌ ssh-keyscan failed with exit code $?"
+    - chmod 644 ~/.ssh/known_hosts
+    - echo "✅ Server added to known hosts"
   script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    # Check artifacts directory
+    - echo "Checking artifacts..."
+    - ls -la _build/prod/rel/
+    - echo "✅ Artifacts checked"
+    
+    # Create compressed tarball of the release
+    - echo "Creating release tarball..."
+    - cd _build/prod/rel && tar -czf ai_brand_agent.tar.gz ai_brand_agent && ls -lh ai_brand_agent.tar.gz
+    - echo "Tarball created"
+    
+    # Copy release to server
+    # Note: We're still in _build/prod/rel directory, so use relative path
+    - echo "Deploying to server"
+    - scp -o StrictHostKeyChecking=no ai_brand_agent.tar.gz "$SERVER_USER@$SERVER_HOST:~/ai_brand_agent.tar.gz"
+    - echo "✅ Release copied"
+    
+    # Run deploy script on server (extracts and prepares the release)
+    - echo "Running deploy script..."
+    # Server script must unpack ~/ai_brand_agent.tar.gz and restart the release (create if missing).
+    - ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_HOST" "/home/$SERVER_USER/deployments/scripts/deploy_ai_brand_agent"
+    - echo "✅ Deployment script completed"
+    - echo "Deployment complete"
