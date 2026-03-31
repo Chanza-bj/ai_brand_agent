@@ -19,6 +19,8 @@ defmodule AiBrandAgent.Auth.TokenVault do
   require Logger
 
   alias AiBrandAgent.Auth.Auth0Client
+  alias AiBrandAgent.Auth.RefreshTokenCrypto
+  alias AiBrandAgent.Logging
 
   # Token Vault exchange is used only for Google (e.g. Calendar). LinkedIn and Facebook
   # use the Management API identity access token until Token Vault is enabled for them.
@@ -171,7 +173,7 @@ defmodule AiBrandAgent.Auth.TokenVault do
             else
               Logger.error(
                 "TokenVault.token_vault_exchange: failed status=#{status} " <>
-                  "connection=#{inspect(conn_id)} body=#{inspect(body)} " <>
+                  "connection=#{inspect(conn_id)} body=#{Logging.safe_http_body(body)} " <>
                   hint_token_vault_error(body)
               )
 
@@ -234,7 +236,7 @@ defmodule AiBrandAgent.Auth.TokenVault do
   end
 
   defp get_refresh_token(%{auth0_refresh_token: rt}) when is_binary(rt) and rt != "" do
-    {:ok, rt}
+    {:ok, RefreshTokenCrypto.decrypt_from_storage(rt)}
   end
 
   defp get_refresh_token(_user) do

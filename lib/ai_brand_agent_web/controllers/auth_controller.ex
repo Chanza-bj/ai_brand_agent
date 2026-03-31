@@ -13,8 +13,10 @@ defmodule AiBrandAgentWeb.AuthController do
   require Logger
 
   alias AiBrandAgent.Auth.Auth0Client
+  alias AiBrandAgent.Auth.RefreshTokenCrypto
   alias AiBrandAgent.Auth.TokenVault
   alias AiBrandAgent.Accounts
+  alias AiBrandAgentWeb.ErrorMessage
 
   @doc "Redirect to Auth0 login via Google."
   def login(conn, _params) do
@@ -117,13 +119,13 @@ defmodule AiBrandAgentWeb.AuthController do
           )
           |> redirect(to: ~p"/")
 
-        {:error, reason} ->
+        {:error, _reason} ->
           conn
           |> delete_session(:auth0_state)
           |> delete_session(:connecting_platform)
           |> delete_session(:connecting_auth0_connection_id)
           |> delete_session(:connecting_user_id)
-          |> put_flash(:error, "Login failed: #{inspect(reason)}")
+          |> put_flash(:error, ErrorMessage.login_failed())
           |> redirect(to: ~p"/")
       end
     end
@@ -497,8 +499,10 @@ defmodule AiBrandAgentWeb.AuthController do
   end
 
   defp store_refresh_token(user, %{"refresh_token" => rt}) when is_binary(rt) do
+    stored = RefreshTokenCrypto.encrypt_for_storage(rt)
+
     case user
-         |> AiBrandAgent.Accounts.User.changeset(%{auth0_refresh_token: rt})
+         |> AiBrandAgent.Accounts.User.changeset(%{auth0_refresh_token: stored})
          |> AiBrandAgent.Repo.update() do
       {:ok, updated} -> updated
       {:error, _} -> user

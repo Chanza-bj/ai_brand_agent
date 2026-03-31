@@ -7,6 +7,8 @@ defmodule AiBrandAgent.Social.GoogleCalendarClient do
 
   require Logger
 
+  alias AiBrandAgent.Logging
+
   @base_url "https://www.googleapis.com/calendar/v3"
 
   @agent_event_marker "[AI Brand Agent]"
@@ -54,7 +56,10 @@ defmodule AiBrandAgent.Social.GoogleCalendarClient do
         {:error, :rate_limited}
 
       {:ok, %{status: status, body: body}} ->
-        Logger.error("Google Calendar list_events error #{status}: #{inspect(body)}")
+        Logger.error(
+          "Google Calendar list_events error #{status}: #{Logging.safe_http_body(body)}"
+        )
+
         {:error, {:google_calendar_error, status}}
 
       {:error, reason} ->
@@ -99,7 +104,10 @@ defmodule AiBrandAgent.Social.GoogleCalendarClient do
         {:error, :rate_limited}
 
       {:ok, %{status: status, body: body}} ->
-        Logger.error("Google Calendar create_event error #{status}: #{inspect(body)}")
+        Logger.error(
+          "Google Calendar create_event error #{status}: #{Logging.safe_http_body(body)}"
+        )
+
         {:error, {:google_calendar_error, status}}
 
       {:error, reason} ->
@@ -127,7 +135,7 @@ defmodule AiBrandAgent.Social.GoogleCalendarClient do
         {:error, :rate_limited}
 
       {:ok, %{status: status, body: body}} ->
-        Logger.warning("Google Calendar delete_event #{status}: #{inspect(body)}")
+        Logger.warning("Google Calendar delete_event #{status}: #{Logging.safe_http_body(body)}")
         {:error, {:google_calendar_error, status}}
 
       {:error, reason} ->

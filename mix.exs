@@ -75,7 +75,11 @@ defmodule AiBrandAgent.MixProject do
       {:jose, "~> 1.11"},
 
       # IANA time zones for local posting times vs UTC
-      {:tzdata, "~> 1.1"}
+      {:tzdata, "~> 1.1"},
+
+      # CI / security
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -98,7 +102,18 @@ defmodule AiBrandAgent.MixProject do
         "esbuild ai_brand_agent --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: [
+        "compile --warnings-as-errors",
+        "deps.unlock --unused",
+        "format",
+        "deps.audit",
+        ~s(sobelow --exit --ignore "Config.CSP,Config.Secrets,Traversal.FileModule"),
+        "test"
+      ],
+      security: [
+        "deps.audit",
+        ~s(sobelow --exit --ignore "Config.CSP,Config.Secrets,Traversal.FileModule")
+      ]
     ]
   end
 end

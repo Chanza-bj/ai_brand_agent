@@ -9,6 +9,8 @@ defmodule AiBrandAgent.Auth.Auth0Client do
 
   require Logger
 
+  alias AiBrandAgent.Logging
+
   @token_path "/oauth/token"
   @userinfo_path "/userinfo"
 
@@ -31,7 +33,7 @@ defmodule AiBrandAgent.Auth.Auth0Client do
 
       {:ok, %{status: status, body: body}} ->
         Logger.error(
-          "Auth0Client.exchange_code: token endpoint status=#{status} body=#{inspect(body)} " <>
+          "Auth0Client.exchange_code: token endpoint status=#{status} body=#{Logging.safe_http_body(body)} " <>
             "(check Auth0 Application: client auth method, client secret, or Token Vault signing key matches uploaded JWKS)"
         )
 
@@ -51,7 +53,9 @@ defmodule AiBrandAgent.Auth.Auth0Client do
         {:ok, profile}
 
       {:ok, %{status: status, body: body}} ->
-        Logger.error("Auth0Client.get_userinfo: status=#{status} body=#{inspect(body)}")
+        Logger.error(
+          "Auth0Client.get_userinfo: status=#{status} body=#{Logging.safe_http_body(body)}"
+        )
 
         {:error, {:auth0_error, status, body}}
 
@@ -102,7 +106,7 @@ defmodule AiBrandAgent.Auth.Auth0Client do
       {:ok, %{status: status, body: body}} ->
         # Details + hints are logged by AiBrandAgent.Auth.TokenVault
         Logger.debug(
-          "Auth0Client.token_vault_exchange: error status=#{status} body=#{inspect(body)}"
+          "Auth0Client.token_vault_exchange: error status=#{status} body=#{Logging.safe_http_body(body)}"
         )
 
         {:error, {:token_vault_error, status, body}}
@@ -137,7 +141,7 @@ defmodule AiBrandAgent.Auth.Auth0Client do
 
       {:ok, %{status: status, body: body}} ->
         Logger.debug(
-          "Auth0Client.exchange_refresh_token_for_my_account_api: error status=#{status} body=#{inspect(body)}"
+          "Auth0Client.exchange_refresh_token_for_my_account_api: error status=#{status} body=#{Logging.safe_http_body(body)}"
         )
 
         {:error, {:auth0_error, status, body}}
@@ -172,7 +176,7 @@ defmodule AiBrandAgent.Auth.Auth0Client do
 
       {:ok, %{status: status, body: body}} ->
         Logger.error(
-          "Auth0Client.connected_accounts_connect: status=#{status} body=#{inspect(body)}"
+          "Auth0Client.connected_accounts_connect: status=#{status} body=#{Logging.safe_http_body(body)}"
         )
 
         {:error, {:my_account_error, status, body}}
@@ -198,7 +202,7 @@ defmodule AiBrandAgent.Auth.Auth0Client do
 
       {:ok, %{status: status, body: body}} ->
         Logger.error(
-          "Auth0Client.connected_accounts_complete: status=#{status} body=#{inspect(body)}"
+          "Auth0Client.connected_accounts_complete: status=#{status} body=#{Logging.safe_http_body(body)}"
         )
 
         {:error, {:my_account_error, status, body}}
@@ -373,7 +377,7 @@ defmodule AiBrandAgent.Auth.Auth0Client do
 
             {:ok, %{status: status, body: body}} ->
               Logger.error(
-                "Auth0Client.link_secondary_identity: failed status=#{status} body=#{inspect(body)}"
+                "Auth0Client.link_secondary_identity: failed status=#{status} body=#{Logging.safe_http_body(body)}"
               )
 
               {:error, {:mgmt_api_error, status, body}}
@@ -408,7 +412,10 @@ defmodule AiBrandAgent.Auth.Auth0Client do
           {:ok, identities}
 
         {:ok, %{status: status, body: body}} ->
-          Logger.error("Management API get user failed #{status}: #{inspect(body)}")
+          Logger.error(
+            "Management API get user failed #{status}: #{Logging.safe_http_body(body)}"
+          )
+
           {:error, {:mgmt_api_error, status, body}}
 
         {:error, reason} ->

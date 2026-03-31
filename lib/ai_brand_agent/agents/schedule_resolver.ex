@@ -21,8 +21,8 @@ defmodule AiBrandAgent.Agents.ScheduleResolver do
   @doc """
   Schedules an **approved** post: picks a slot, then creates calendar event + Oban publish job.
   """
-  def schedule_approved_post(post_id) do
-    case ContentService.get_post(post_id) do
+  def schedule_approved_post(post_id, user_id) do
+    case ContentService.get_post_for_user(post_id, user_id) do
       nil ->
         {:error, :not_found}
 
@@ -41,7 +41,7 @@ defmodule AiBrandAgent.Agents.ScheduleResolver do
 
     with :ok <- check_daily_cap(user_id, pref),
          {:ok, slot} <- next_open_slot(user_id, pref) do
-      CalendarAgent.schedule_post_at(post.id, slot)
+      CalendarAgent.schedule_post_at(post.id, post.user_id, slot)
     end
   end
 

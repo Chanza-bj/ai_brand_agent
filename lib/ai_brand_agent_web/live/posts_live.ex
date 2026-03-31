@@ -7,6 +7,7 @@ defmodule AiBrandAgentWeb.PostsLive do
 
   alias AiBrandAgent.Repo
   alias AiBrandAgent.Services.ContentService
+  alias AiBrandAgentWeb.ErrorMessage
   alias AiBrandAgent.Social.FacebookClient
   alias AiBrandAgent.Workers.PublishWorker
 
@@ -46,9 +47,11 @@ defmodule AiBrandAgentWeb.PostsLive do
   end
 
   def handle_event("approve", %{"id" => post_id}, socket) do
-    case ContentService.get_post(post_id) do
+    user = socket.assigns.current_user
+
+    case ContentService.get_post_for_user(post_id, user.id) do
       nil ->
-        {:noreply, put_flash(socket, :error, "Post not found")}
+        {:noreply, put_flash(socket, :error, ErrorMessage.post_not_found())}
 
       post ->
         case ContentService.approve_post(post) do
@@ -57,23 +60,33 @@ defmodule AiBrandAgentWeb.PostsLive do
             {:noreply, assign(socket, posts: posts) |> put_flash(:info, "Post approved!")}
 
           {:error, reason} ->
-            {:noreply, put_flash(socket, :error, "Cannot approve: #{inspect(reason)}")}
+            {:noreply, put_flash(socket, :error, ErrorMessage.post_action(reason))}
         end
     end
   end
 
   def handle_event("publish", %{"id" => post_id}, socket) do
-    %{post_id: post_id}
-    |> PublishWorker.new()
-    |> Oban.insert()
+    user = socket.assigns.current_user
 
-    {:noreply, put_flash(socket, :info, "Publishing queued!")}
+    case ContentService.get_post_for_user(post_id, user.id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, ErrorMessage.post_not_found())}
+
+      _post ->
+        %{post_id: post_id}
+        |> PublishWorker.new()
+        |> Oban.insert()
+
+        {:noreply, put_flash(socket, :info, "Publishing queued!")}
+    end
   end
 
   def handle_event("retry", %{"id" => post_id}, socket) do
-    case ContentService.get_post(post_id) do
+    user = socket.assigns.current_user
+
+    case ContentService.get_post_for_user(post_id, user.id) do
       nil ->
-        {:noreply, put_flash(socket, :error, "Post not found")}
+        {:noreply, put_flash(socket, :error, ErrorMessage.post_not_found())}
 
       post ->
         case ContentService.retry_post(post) do
@@ -85,7 +98,7 @@ defmodule AiBrandAgentWeb.PostsLive do
              |> put_flash(:info, "Post reset. Ready to publish again.")}
 
           {:error, reason} ->
-            {:noreply, put_flash(socket, :error, "Cannot retry: #{inspect(reason)}")}
+            {:noreply, put_flash(socket, :error, ErrorMessage.post_action(reason))}
         end
     end
   end

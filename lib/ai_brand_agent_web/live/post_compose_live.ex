@@ -56,8 +56,13 @@ defmodule AiBrandAgentWeb.PostComposeLive do
              |> put_flash(:info, "Draft saved.")
              |> push_navigate(to: ~p"/posts/#{post.id}")}
 
-          {:error, %Ecto.Changeset{} = cs} ->
-            {:noreply, put_flash(socket, :error, "Could not save: #{inspect(cs.errors)}")}
+          {:error, %Ecto.Changeset{}} ->
+            {:noreply,
+             put_flash(
+               socket,
+               :error,
+               "Could not save. Check platform and content, then try again."
+             )}
         end
     end
   end

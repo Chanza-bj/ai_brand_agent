@@ -9,6 +9,11 @@ import Config
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
+config :ai_brand_agent, :env, config_env()
+
+# When true (default), omit full third-party HTTP bodies from logs in `:prod`.
+config :ai_brand_agent, :redact_third_party_logs, true
+
 config :ai_brand_agent,
   ecto_repos: [AiBrandAgent.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]

@@ -161,6 +161,24 @@ defmodule AiBrandAgent.Services.ContentServiceTest do
     end
   end
 
+  describe "get_post_for_user/3" do
+    test "returns post when it belongs to the user" do
+      user = user_fixture()
+      post = post_fixture(user)
+
+      loaded = ContentService.get_post_for_user(post.id, user.id, [:topic])
+      assert loaded.id == post.id
+    end
+
+    test "returns nil when post belongs to another user" do
+      u1 = user_fixture()
+      u2 = user_fixture()
+      post = post_fixture(u1)
+
+      assert ContentService.get_post_for_user(post.id, u2.id) == nil
+    end
+  end
+
   describe "list_recent_topics/1" do
     test "returns recent topics" do
       topic_fixture(%{title: "Topic A"})

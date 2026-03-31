@@ -40,3 +40,8 @@ config :phoenix_live_view,
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# Deterministic key for RefreshTokenCrypto tests (32-byte AES-256).
+config :ai_brand_agent,
+       :auth0_refresh_token_encryption_key,
+       :crypto.hash(:sha256, "test-suite-auth0-refresh-token-encryption-key")

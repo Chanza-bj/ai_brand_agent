@@ -94,7 +94,7 @@ defmodule AiBrandAgent.Agents.MultiPostGenerator do
       {:ok, approved} ->
         _ = Accounts.log_agent_decision(user_id, approved.id, "auto_approve", %{})
 
-        case ScheduleResolver.schedule_approved_post(approved.id) do
+        case ScheduleResolver.schedule_approved_post(approved.id, user_id) do
           {:ok, %{scheduled_at: slot} = info} ->
             _ =
               Accounts.log_agent_decision(user_id, approved.id, "auto_scheduled", %{

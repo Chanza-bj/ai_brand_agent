@@ -40,16 +40,16 @@ defmodule AiBrandAgent.Agents.CalendarAgent do
 
   Returns `{:ok, %{scheduled_at: DateTime.t(), calendar_event_id: String.t()}}` or `{:error, reason}`.
   """
-  def schedule_post(post_id) do
-    GenServer.call(__MODULE__, {:schedule_post, post_id}, :timer.seconds(20))
+  def schedule_post(post_id, user_id) do
+    GenServer.call(__MODULE__, {:schedule_post, post_id, user_id}, :timer.seconds(20))
   end
 
   @doc """
-  Like `schedule_post/1` but uses the given `DateTime` instead of discovering a slot via
+  Like `schedule_post/2` but uses the given `DateTime` instead of discovering a slot via
   `find_optimal_slot/2`.
   """
-  def schedule_post_at(post_id, %DateTime{} = slot) do
-    GenServer.call(__MODULE__, {:schedule_post_at, post_id, slot}, :timer.seconds(20))
+  def schedule_post_at(post_id, user_id, %DateTime{} = slot) do
+    GenServer.call(__MODULE__, {:schedule_post_at, post_id, user_id, slot}, :timer.seconds(20))
   end
 
   @doc """
@@ -80,12 +80,12 @@ defmodule AiBrandAgent.Agents.CalendarAgent do
     {:reply, do_find_optimal_slot(user_id, opts), state}
   end
 
-  def handle_call({:schedule_post, post_id}, _from, state) do
-    {:reply, do_schedule_post(post_id), state}
+  def handle_call({:schedule_post, post_id, user_id}, _from, state) do
+    {:reply, do_schedule_post(post_id, user_id), state}
   end
 
-  def handle_call({:schedule_post_at, post_id, slot}, _from, state) do
-    {:reply, do_schedule_post_at(post_id, slot), state}
+  def handle_call({:schedule_post_at, post_id, user_id, slot}, _from, state) do
+    {:reply, do_schedule_post_at(post_id, user_id, slot), state}
   end
 
   def handle_call({:busy?, user_id, datetime}, _from, state) do
@@ -110,15 +110,15 @@ defmodule AiBrandAgent.Agents.CalendarAgent do
     end
   end
 
-  defp do_schedule_post(post_id) do
-    with {:ok, post} <- fetch_post(post_id),
+  defp do_schedule_post(post_id, user_id) do
+    with {:ok, post} <- fetch_post(post_id, user_id),
          {:ok, slot} <- do_find_optimal_slot(post.user_id, hours: 24) do
       finalize_schedule(post, slot)
     end
   end
 
-  defp do_schedule_post_at(post_id, %DateTime{} = slot) do
-    with {:ok, post} <- fetch_post(post_id) do
+  defp do_schedule_post_at(post_id, user_id, %DateTime{} = slot) do
+    with {:ok, post} <- fetch_post(post_id, user_id) do
       finalize_schedule(post, slot)
     end
   end
@@ -158,8 +158,8 @@ defmodule AiBrandAgent.Agents.CalendarAgent do
     TokenVault.get_access_token(user_id, "google")
   end
 
-  defp fetch_post(post_id) do
-    case ContentService.get_post(post_id) do
+  defp fetch_post(post_id, user_id) do
+    case ContentService.get_post_for_user(post_id, user_id) do
       nil -> {:error, :post_not_found}
       post -> {:ok, post}
     end

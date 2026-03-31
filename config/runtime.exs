@@ -1,5 +1,8 @@
 import Config
 
+# Prefer `brand_<NAME>` / `BRAND_<NAME>` for shared hosts, then standard names (see `AiBrandAgent.Config.Env`).
+alias AiBrandAgent.Config.Env, as: Env
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration
@@ -16,44 +19,44 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
-if System.get_env("PHX_SERVER") do
+if Env.get("PHX_SERVER") do
   config :ai_brand_agent, AiBrandAgentWeb.Endpoint, server: true
 end
 
-if port = System.get_env("PORT") do
+if port = Env.get("PORT") do
   config :ai_brand_agent, AiBrandAgentWeb.Endpoint, http: [port: String.to_integer(port)]
 end
 
 # Auth0 configuration from environment
-if auth0_domain = System.get_env("AUTH0_DOMAIN") do
+if auth0_domain = Env.get("AUTH0_DOMAIN") do
   config :ai_brand_agent, :auth0,
     domain: auth0_domain,
-    client_id: System.fetch_env!("AUTH0_CLIENT_ID"),
-    client_secret: System.fetch_env!("AUTH0_CLIENT_SECRET"),
-    audience: System.get_env("AUTH0_AUDIENCE", "https://#{auth0_domain}/api/v2/")
+    client_id: Env.get!("AUTH0_CLIENT_ID"),
+    client_secret: Env.get!("AUTH0_CLIENT_SECRET"),
+    audience: Env.get("AUTH0_AUDIENCE") || "https://#{auth0_domain}/api/v2/"
 end
 
-if fb_scope = System.get_env("AUTH0_FACEBOOK_CONNECTION_SCOPE") do
+if fb_scope = Env.get("AUTH0_FACEBOOK_CONNECTION_SCOPE") do
   config :ai_brand_agent, :facebook_connection_scope, fb_scope
 end
 
-if li_scope = System.get_env("AUTH0_LINKEDIN_CONNECTION_SCOPE") do
+if li_scope = Env.get("AUTH0_LINKEDIN_CONNECTION_SCOPE") do
   config :ai_brand_agent, :linkedin_connection_scope, li_scope
 end
 
-if fb_conn = System.get_env("AUTH0_FACEBOOK_CONNECTION_NAME") do
+if fb_conn = Env.get("AUTH0_FACEBOOK_CONNECTION_NAME") do
   config :ai_brand_agent, :facebook_auth0_connection, fb_conn
 end
 
-if my_scope = System.get_env("AUTH0_MY_ACCOUNT_SCOPE") do
+if my_scope = Env.get("AUTH0_MY_ACCOUNT_SCOPE") do
   config :ai_brand_agent, :auth0_my_account_scope, my_scope
 end
 
 # Auth0 Token Vault - RSA private key for Privileged Worker JWT signing
 # Use AUTH0_TOKEN_VAULT_PRIVATE_KEY (PEM string) or AUTH0_TOKEN_VAULT_PRIVATE_KEY_PATH (file path)
 token_vault_config =
-  case {System.get_env("AUTH0_TOKEN_VAULT_PRIVATE_KEY"),
-        System.get_env("AUTH0_TOKEN_VAULT_PRIVATE_KEY_PATH")} do
+  case {Env.get("AUTH0_TOKEN_VAULT_PRIVATE_KEY"),
+        Env.get("AUTH0_TOKEN_VAULT_PRIVATE_KEY_PATH")} do
     {pk, _} when is_binary(pk) -> [private_key: pk]
     {_, path} when is_binary(path) -> [private_key_path: path]
     _ -> nil
@@ -64,31 +67,49 @@ if token_vault_config do
 end
 
 # Gemini API key from environment (merge so retry/backoff keys from config.exs stay available)
-if gemini_key = System.get_env("GEMINI_API_KEY") do
+if gemini_key = Env.get("GEMINI_API_KEY") do
   prior = Application.get_env(:ai_brand_agent, :gemini) || []
 
   config :ai_brand_agent,
          :gemini,
          Keyword.merge(prior,
            api_key: gemini_key,
-           model: System.get_env("GEMINI_MODEL", Keyword.get(prior, :model, "gemini-1.5-flash"))
+           model: Env.get("GEMINI_MODEL") || Keyword.get(prior, :model, "gemini-1.5-flash")
          )
+end
+
+# Optional: encrypt `users.auth0_refresh_token` at rest (Base64-encoded 32-byte key, AES-256-GCM).
+case Env.get("AUTH0_REFRESH_TOKEN_ENCRYPTION_KEY") do
+  key_b64 when is_binary(key_b64) and key_b64 != "" ->
+    decoded = Base.decode64!(String.trim(key_b64))
+
+    if byte_size(decoded) != 32 do
+      raise """
+      AUTH0_REFRESH_TOKEN_ENCRYPTION_KEY must be Base64 that decodes to exactly 32 bytes (AES-256).
+      Generate e.g.: openssl rand -base64 32
+      """
+    end
+
+    config :ai_brand_agent, :auth0_refresh_token_encryption_key, decoded
+
+  _ ->
+    :ok
 end
 
 if config_env() == :prod do
   database_url =
-    System.get_env("DATABASE_URL") ||
+    Env.get("DATABASE_URL") ||
       raise """
-      environment variable DATABASE_URL is missing.
+      environment variable DATABASE_URL is missing (or brand_DATABASE_URL / BRAND_DATABASE_URL).
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
-  maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+  maybe_ipv6 = if Env.get("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :ai_brand_agent, AiBrandAgent.Repo,
     # ssl: true,
     url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    pool_size: String.to_integer(Env.get("POOL_SIZE") || "10"),
     # For machines with several cores, consider starting multiple pools of `pool_size`
     # pool_count: 4,
     socket_options: maybe_ipv6
@@ -99,15 +120,15 @@ if config_env() == :prod do
   # to check this value into version control, so we use an environment
   # variable instead.
   secret_key_base =
-    System.get_env("SECRET_KEY_BASE") ||
+    Env.get("SECRET_KEY_BASE") ||
       raise """
-      environment variable SECRET_KEY_BASE is missing.
+      environment variable SECRET_KEY_BASE is missing (or brand_SECRET_KEY_BASE / BRAND_SECRET_KEY_BASE).
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host = Env.get("PHX_HOST") || "example.com"
 
-  config :ai_brand_agent, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :ai_brand_agent, :dns_cluster_query, Env.get("DNS_CLUSTER_QUERY")
 
   config :ai_brand_agent, AiBrandAgentWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],

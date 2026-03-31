@@ -78,6 +78,18 @@ defmodule AiBrandAgent.Services.ContentService do
   end
 
   @doc """
+  Get a post by ID only if it belongs to `user_id`.
+
+  Use this for browser/API flows to prevent IDOR. Internal jobs may use `get_post/2`
+  when the caller has already validated ownership.
+  """
+  def get_post_for_user(id, user_id, preloads \\ []) do
+    Post
+    |> Repo.get_by(id: id, user_id: user_id)
+    |> maybe_preload(preloads)
+  end
+
+  @doc """
   Count posts per status for dashboard stats (all posts for the user, not a limited sample).
   """
   def post_dashboard_stats(user_id) do

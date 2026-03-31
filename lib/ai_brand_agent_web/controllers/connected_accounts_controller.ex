@@ -11,6 +11,8 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
 
   alias AiBrandAgent.Accounts
   alias AiBrandAgent.Auth.Auth0Client
+  alias AiBrandAgent.Auth.RefreshTokenCrypto
+  alias AiBrandAgent.Logging
 
   @session_auth_session :connected_accounts_auth_session
   @session_state :connected_accounts_oauth_state
@@ -23,9 +25,11 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
     user = conn.assigns.current_user
     user = Accounts.get_user(user.id)
 
+    rt_plain = refresh_token_plain(user)
+
     with %{} = user,
-         rt when is_binary(rt) and rt != "" <- user.auth0_refresh_token,
-         {:ok, my_at} <- Auth0Client.exchange_refresh_token_for_my_account_api(rt) do
+         true <- rt_plain != "",
+         {:ok, my_at} <- Auth0Client.exchange_refresh_token_for_my_account_api(rt_plain) do
       # Use request host/port so redirect_uri matches the browser (and Auth0 Allowed Callback URLs).
       redirect_uri = url(conn, ~p"/auth/connected-accounts/callback")
       state = random_state()
@@ -53,7 +57,7 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
 
         {:error, {:auth0_error, status, body}} ->
           Logger.warning(
-            "ConnectedAccounts.start: my_account token exchange failed status=#{status} body=#{inspect(body)}"
+            "ConnectedAccounts.start: my_account token exchange failed status=#{status} body=#{Logging.safe_http_body(body)}"
           )
 
           conn
@@ -65,7 +69,7 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
 
         {:error, {:my_account_error, status, body}} ->
           Logger.warning(
-            "ConnectedAccounts.start: connect failed status=#{status} body=#{inspect(body)}"
+            "ConnectedAccounts.start: connect failed status=#{status} body=#{Logging.safe_http_body(body)}"
           )
 
           conn
@@ -158,7 +162,7 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
             |> redirect(to: ~p"/")
 
           user ->
-            case user.auth0_refresh_token do
+            case refresh_token_plain(user) do
               rt when is_binary(rt) and rt != "" ->
                 case Auth0Client.exchange_refresh_token_for_my_account_api(rt) do
                   {:ok, my_at} ->
@@ -178,7 +182,7 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
 
                       {:error, {:my_account_error, status, body}} ->
                         Logger.warning(
-                          "ConnectedAccounts.callback: complete failed status=#{status} body=#{inspect(body)}"
+                          "ConnectedAccounts.callback: complete failed status=#{status} body=#{Logging.safe_http_body(body)}"
                         )
 
                         conn
@@ -197,7 +201,7 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
 
                   {:error, {:auth0_error, status, body}} ->
                     Logger.warning(
-                      "ConnectedAccounts.callback: my_account token exchange failed status=#{status} body=#{inspect(body)}"
+                      "ConnectedAccounts.callback: my_account token exchange failed status=#{status} body=#{Logging.safe_http_body(body)}"
                     )
 
                     conn
@@ -227,6 +231,12 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
     end
   end
 
+  defp refresh_token_plain(%{auth0_refresh_token: rt}) when is_binary(rt) and rt != "" do
+    RefreshTokenCrypto.decrypt_from_storage(rt)
+  end
+
+  defp refresh_token_plain(_), do: ""
+
   defp clear_connected_sessions(conn) do
     conn
     |> delete_session(@session_auth_session)
@@ -241,7 +251,7 @@ defmodule AiBrandAgentWeb.ConnectedAccountsController do
   end
 
   defp user_facing_my_account_error(status, body) when is_map(body) do
-    err = Map.get(body, "error") || Map.get(body, "error_description") || inspect(body)
+    err = Map.get(body, "error") || Map.get(body, "error_description") || "unknown error"
 
     "My Account API token exchange failed (#{status}): #{err}. " <>
       "Enable MRRT + My Account API access (Connected Accounts scopes) for this application in Auth0."

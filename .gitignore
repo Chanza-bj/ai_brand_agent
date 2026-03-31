@@ -52,3 +52,9 @@ public_key.pem
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Markdown — ignore all except root README (e.g. keep AGENTS.md / notes local)
+*.md
+!README.md
+!HACKATHON_SUBMISSION.md
+!HACKATHON_DEMO_RECORDING.md
