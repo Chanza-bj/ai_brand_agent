@@ -21,11 +21,13 @@ fi
 
 cd "${HOME}"
 
+echo "==> Backing up existing release (if any)"
 if [[ -d "${TARGET}" ]]; then
   rm -rf "${TARGET}.bak"
   mv "${TARGET}" "${TARGET}.bak"
 fi
 
+echo "==> Unpacking ${TARBALL} -> ${TARGET}"
 tar -xzf "${TARBALL}"
 
 if [[ ! -x "${TARGET}/bin/ai_brand_agent" ]]; then
@@ -36,9 +38,10 @@ fi
 chmod +x "${TARGET}/bin/ai_brand_agent" 2>/dev/null || true
 
 if [[ "${SKIP_SYSTEMD_RESTART:-0}" == "1" ]]; then
-  echo "SKIP_SYSTEMD_RESTART=1 — not restarting service"
+  echo "SKIP_SYSTEMD_RESTART=1 — unpack done; not restarting service"
   exit 0
 fi
 
+echo "==> Restarting ai-brand-agent.service"
 sudo systemctl restart ai-brand-agent.service
-echo "Deployed and restarted ai-brand-agent.service"
+echo "==> Done: unpacked and service restarted"

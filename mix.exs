@@ -11,7 +11,18 @@ defmodule AiBrandAgent.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      releases: releases()
+    ]
+  end
+
+  defp releases do
+    [
+      ai_brand_agent: [
+        # `force_ssl` is set only in config/runtime.exs (PHX_PUBLIC_SCHEME / reverse proxy).
+        # Phoenix marks it compile-time; runtime values differ by deploy → skip this check.
+        validate_compile_env: false
+      ]
     ]
   end
 
