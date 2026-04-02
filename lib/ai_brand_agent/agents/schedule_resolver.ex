@@ -1,7 +1,7 @@
 defmodule AiBrandAgent.Agents.ScheduleResolver do
   @moduledoc """
   Picks the next publish slot: prefers upcoming instances of the synced
-  `[AI Brand Agent] posting slots` Google Calendar series, then falls back to
+  `[Athena] posting slots` Google Calendar series (legacy: `[AI Brand Agent] posting slots`), then falls back to
   the same schedule computed in the user's IANA timezone.
 
   Daily cap: 3 published posts per **local** calendar day (fixed product limit).

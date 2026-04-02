@@ -14,7 +14,7 @@ defmodule AiBrandAgent.Agents.AgentPostingCalendarSync do
   alias AiBrandAgent.Calendar.LocalScheduling
   alias AiBrandAgent.Social.GoogleCalendarClient
 
-  @event_summary "[AI Brand Agent] posting slots"
+  @event_summary "[Athena] posting slots"
 
   @doc "Public summary prefix so `GoogleCalendarClient` can filter agent events."
   def event_summary, do: @event_summary
@@ -60,7 +60,7 @@ defmodule AiBrandAgent.Agents.AgentPostingCalendarSync do
       event = %{
         summary: @event_summary,
         description:
-          "Preferred posting windows for AI Brand Agent. Transparent (does not block your calendar for others).",
+          "Preferred posting windows for Athena. Transparent (does not block your calendar for others).",
         start: local_start,
         end: local_end,
         recurrence: [rrule],

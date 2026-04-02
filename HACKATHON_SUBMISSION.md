@@ -6,10 +6,10 @@ Use the **Project description** block below on the submission form. Trim if the 
 
 ## Project description (paste into form)
 
-**AI Brand Agent** is a Phoenix web app that acts as an **AI-powered brand assistant**: it discovers niche-driven topic ideas (via Gemini), generates multiple post variants, ranks them, and schedules or publishes to **LinkedIn** and **Facebook**—with the user’s **posting windows** grounded in **Google Calendar**.
+**Athena** is a Phoenix web app that acts as an **AI-powered brand assistant**: it discovers niche-driven topic ideas (via Gemini), generates multiple post variants, ranks them, and schedules or publishes to **LinkedIn** and **Facebook**—with the user’s **posting windows** grounded in **Google Calendar**.
 
 **Why Auth0 for AI Agents (Token Vault)**  
-The hackathon requires agents to act on behalf of users with real OAuth consent—not by copying long-lived Google secrets into our database. **AI Brand Agent uses Auth0 Token Vault** to obtain **Google access tokens** through Auth0’s token exchange, so federated refresh material stays in Auth0’s trust boundary. Our server calls Google Calendar APIs (read busy times, sync transparent “posting slot” events) through that flow. LinkedIn and Facebook publishing use Auth0’s **Management API** identity tokens, matching how humans link social accounts.
+The hackathon requires agents to act on behalf of users with real OAuth consent—not by copying long-lived Google secrets into our database. **Athena uses Auth0 Token Vault** to obtain **Google access tokens** through Auth0’s token exchange, so federated refresh material stays in Auth0’s trust boundary. Our server calls Google Calendar APIs (read busy times, sync transparent “posting slot” events) through that flow. LinkedIn and Facebook publishing use Auth0’s **Management API** identity tokens, matching how humans link social accounts.
 
 **User-facing features**  
 - **Sign in** with Auth0 (e.g. Google).  
@@ -48,7 +48,7 @@ If you submit the blog in the **same** text field, add a visible header so judge
 
 ---
 
-### BONUS BLOG POST — Token Vault in AI Brand Agent
+### BONUS BLOG POST — Token Vault in Athena
 
 *[Paste 250+ words here: your journey enabling Token Vault, federated vs Management API fallback, Connected Accounts, one pitfall you hit, and what you’d build next. Keep it materially different from the short description above.]*
 

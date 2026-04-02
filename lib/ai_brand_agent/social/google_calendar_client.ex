@@ -11,13 +11,14 @@ defmodule AiBrandAgent.Social.GoogleCalendarClient do
 
   @base_url "https://www.googleapis.com/calendar/v3"
 
-  @agent_event_marker "[AI Brand Agent]"
+  # New series use `[Athena]`; older installs may still have `[AI Brand Agent]` in Calendar.
+  @agent_event_markers ["[Athena]", "[AI Brand Agent]"]
 
   @doc """
   True if this event is our synced posting-slot series (ignored for busy checks).
   """
   def agent_posting_slot_event?(%{"summary" => summary}) when is_binary(summary) do
-    String.contains?(summary, @agent_event_marker)
+    Enum.any?(@agent_event_markers, &String.contains?(summary, &1))
   end
 
   def agent_posting_slot_event?(_), do: false

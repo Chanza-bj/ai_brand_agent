@@ -1,6 +1,6 @@
-# AiBrandAgent
+# Athena (AiBrandAgent)
 
-Phoenix app for an **AI brand agent**: trend discovery, **Gemini** content generation, and scheduled/published posts to **LinkedIn** and **Facebook**. **Google Calendar** integration uses **[Auth0 for AI Agents — Token Vault](https://auth0.com/ai/docs/intro/token-vault)** so federated tokens stay in Auth0, not in your database.
+Phoenix app **Athena**: trend discovery, **Gemini** content generation, and scheduled/published posts to **LinkedIn** and **Facebook**. **Google Calendar** integration uses **[Auth0 for AI Agents — Token Vault](https://auth0.com/ai/docs/intro/token-vault)** so federated tokens stay in Auth0, not in your database.
 
 ---
 

@@ -2,7 +2,7 @@ defmodule AiBrandAgentWeb.DashboardLive do
   @moduledoc """
   Main dashboard LiveView.
 
-  Shows an overview of the user's AI brand agent activity:
+  Shows an overview of the user's Athena activity:
   recent posts, trending topics, and connected platforms.
   """
 
@@ -110,7 +110,7 @@ defmodule AiBrandAgentWeb.DashboardLive do
     ~H"""
     <div class="max-w-6xl mx-auto px-4 py-8">
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-base-content">AI Brand Agent</h1>
+        <h1 class="text-3xl font-bold text-base-content">Athena</h1>
         <p class="text-base-content/70 mt-1 flex flex-wrap items-center gap-2">
           <span>Welcome back, {@current_user.name}</span>
           <%= cond do %>

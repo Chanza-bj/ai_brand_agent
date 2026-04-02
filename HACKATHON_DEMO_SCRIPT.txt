@@ -1,5 +1,5 @@
 ================================================================================
-AI BRAND AGENT — Hackathon demo script (~3 min)
+ATHENA — Hackathon demo script (~3 min)
 Authorized to Act | Auth0 Token Vault
 Read aloud. Target: under 3:00. Stop after CLOSE.
 Full workflow: see HACKATHON_DEMO_RECORDING.md
@@ -9,7 +9,7 @@ Full workflow: see HACKATHON_DEMO_RECORDING.md
 
 Today's AI agents need to call real APIs—like Google Calendar—without turning every app into a secret warehouse for OAuth tokens.
 
-AI Brand Agent is a Phoenix web app that uses Auth0 for AI Agents, Token Vault, so Google access tokens are issued through Auth0's trust boundary, not pasted into our database.
+Athena is a Phoenix web app that uses Auth0 for AI Agents, Token Vault, so Google access tokens are issued through Auth0's trust boundary, not pasted into our database.
 
 I'll show how a user's posting schedule syncs to Google Calendar and how the agent uses that when it schedules content.
 
@@ -29,7 +29,7 @@ In Agent settings, I set timezone, weekdays, and local post time—this is local
 
 I hit Save and sync calendar—that writes transparent posting windows to Google Calendar so I can see them and the agent can read them.
 
-OPTIONAL: Open Google Calendar in another tab—here are the AI Brand Agent posting slots.
+OPTIONAL: Open Google Calendar in another tab—here are the Athena posting slots.
 
 
 --- [1:40–2:35] POSTS + AGENT BEHAVIOR ---
@@ -43,7 +43,7 @@ The product caps publishes per day so the user keeps control.
 
 Summary: Token Vault powers Google Calendar integration; Auth0 handles login and consent; the user defines when the agent may act.
 
-That's AI Brand Agent—link to the repo and live demo in the description.
+That's Athena—link to the repo and live demo in the description.
 
 
 --- STOP RECORDING. Do not pass three minutes. ---

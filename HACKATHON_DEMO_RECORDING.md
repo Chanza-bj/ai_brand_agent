@@ -60,7 +60,7 @@ Companion to `HACKATHON_SUBMISSION.md`. Use this to rehearse and record your **~
 ### [0:00–0:25] Hook + Token Vault
 
 > “Today’s AI agents need to call real APIs—like Google Calendar—without turning every app into a secret warehouse for OAuth tokens.  
-> **AI Brand Agent** is a Phoenix web app that uses **Auth0 for AI Agents — Token Vault** so Google access tokens are issued through Auth0’s trust boundary, not pasted into our database.  
+> **Athena** is a Phoenix web app that uses **Auth0 for AI Agents — Token Vault** so Google access tokens are issued through Auth0’s trust boundary, not pasted into our database.  
 > I’ll show how a user’s **posting schedule** syncs to **Google Calendar** and how the agent uses that when it schedules content.”
 
 ### [0:25–0:55] Login + dashboard
@@ -73,7 +73,7 @@ Companion to `HACKATHON_SUBMISSION.md`. Use this to rehearse and record your **~
 > “Under **Connections**, Google is linked for **Token Vault**—the app exchanges the user’s Auth0 session for Google API access the right way.  
 > In **Agent settings**, I set **timezone**, **weekdays**, and **local post time**—this is **local wall time**, not a confusing UTC offset.  
 > I hit **Save and sync calendar**—that writes **transparent posting windows** to **Google Calendar** so I can see them and the agent can read them.  
-> *[Optional: open **Google Calendar** in another tab—here are the **[AI Brand Agent] posting slots**.]*”
+> *[Optional: open **Google Calendar** in another tab—here are the **[Athena] posting slots**.]*”
 
 ### [1:40–2:35] Posts + agent behavior
 
@@ -83,7 +83,7 @@ Companion to `HACKATHON_SUBMISSION.md`. Use this to rehearse and record your **~
 ### [2:35–2:55] Close
 
 > “**Summary:** **Token Vault** powers **Google Calendar** integration; **Auth0** handles **login and consent**; the user defines **when** the agent may act.  
-> That’s **AI Brand Agent**—link to the repo and live demo in the description.”
+> That’s **Athena**—link to the repo and live demo in the description.”
 
 **Stop. Do not add a fourth act.**
 
@@ -100,7 +100,7 @@ Companion to `HACKATHON_SUBMISSION.md`. Use this to rehearse and record your **~
 ## 5. YouTube description (paste)
 
 ```text
-Demo: AI Brand Agent — Auth0 Token Vault for Google Calendar; Auth0 login; agent posting windows + calendar-aware scheduling; LinkedIn/Facebook via Auth0-linked accounts.
+Demo: Athena — Auth0 Token Vault for Google Calendar; Auth0 login; agent posting windows + calendar-aware scheduling; LinkedIn/Facebook via Auth0-linked accounts.
 
 Live app: <YOUR_URL>
 Repo: <YOUR_REPO_URL>
