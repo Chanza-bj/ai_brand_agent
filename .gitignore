@@ -53,8 +53,11 @@ public_key.pem
 .DS_Store
 Thumbs.db
 
-# Markdown — ignore all except root README (e.g. keep AGENTS.md / notes local)
+# Markdown — only README is tracked; other .md stay local (AGENTS.md, notes, etc.)
 *.md
 !README.md
-!HACKATHON_SUBMISSION.md
-!HACKATHON_DEMO_RECORDING.md
+
+# Text files — not tracked (Phoenix robots.txt stays an exception)
+*.txt
+!priv/static/robots.txt
+!priv/static/robots-*.txt
