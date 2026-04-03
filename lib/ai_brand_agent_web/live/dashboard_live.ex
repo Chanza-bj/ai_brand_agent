@@ -163,16 +163,19 @@ defmodule AiBrandAgentWeb.DashboardLive do
 
       <div
         :if={@publishing_connections == []}
-        class="mb-6 rounded-lg border border-warning/30 bg-warning/5 px-4 py-3 flex items-center gap-3"
+        class="mb-6 flex flex-col gap-3 rounded-lg border border-warning/30 bg-warning/5 px-4 py-3 sm:flex-row sm:items-center"
       >
-        <.icon name="hero-link" class="w-5 h-5 text-warning" />
-        <div class="flex-1">
+        <.icon name="hero-link" class="h-5 w-5 shrink-0 text-warning" />
+        <div class="min-w-0 flex-1">
           <span class="text-sm font-medium">No publishing platforms connected</span>
-          <span class="text-xs text-base-content/60 ml-1">
+          <span class="text-xs text-base-content/60">
             — connect LinkedIn or Facebook to publish posts.
           </span>
         </div>
-        <.link navigate={~p"/connections"} class="btn btn-xs btn-warning btn-outline">
+        <.link
+          navigate={~p"/connections"}
+          class="btn btn-outline btn-warning btn-sm w-full shrink-0 sm:w-auto"
+        >
           Connect
         </.link>
       </div>
@@ -182,7 +185,7 @@ defmodule AiBrandAgentWeb.DashboardLive do
         <div class="lg:col-span-2">
           <h2 class="text-xl font-semibold mb-4">Recent Posts</h2>
           <div :if={@posts == []} class="text-base-content/50 italic">
-            No posts yet. Add <.link navigate={~p"/niches"} class="link">nichess</.link>
+            No posts yet. Add <.link navigate={~p"/niches"} class="link">niches</.link>
             for AI drafts or <.link navigate={~p"/posts/new"} class="link">compose</.link>
             your own.
           </div>
@@ -214,9 +217,11 @@ defmodule AiBrandAgentWeb.DashboardLive do
     <!-- Niches + topic ideas -->
         <div>
           <div class="mb-6">
-            <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h2 class="text-lg font-semibold">Your niches</h2>
-              <.link navigate={~p"/niches"} class="btn btn-xs btn-ghost">Edit</.link>
+              <.link navigate={~p"/niches"} class="btn btn-ghost btn-sm w-fit">
+                Edit
+              </.link>
             </div>
             <div :if={@niches == []} class="text-base-content/50 italic text-sm">
               None yet — <.link navigate={~p"/niches"} class="link">add niches</.link>
@@ -230,9 +235,11 @@ defmodule AiBrandAgentWeb.DashboardLive do
             </ul>
           </div>
 
-          <div class="flex items-center justify-between gap-2 mb-4">
+          <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 class="text-xl font-semibold">Topic ideas</h2>
-            <.link navigate={~p"/niches"} class="btn btn-xs btn-ghost">Manage niches</.link>
+            <.link navigate={~p"/niches"} class="btn btn-ghost btn-sm w-fit">
+              Manage niches
+            </.link>
           </div>
           <div :if={@topics == []} class="text-base-content/50 italic text-sm">
             No AI-generated angles yet. After you add a niche, we queue a fetch (and the scheduler runs every 15 minutes). If Gemini rate-limits, try again shortly.

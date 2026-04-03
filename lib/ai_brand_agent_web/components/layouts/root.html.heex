@@ -41,29 +41,90 @@
     </script>
   </head>
   <body class="min-h-screen bg-base-100">
-    <nav class="navbar bg-base-200 border-b border-base-300 px-4">
-      <div class="flex-1">
-        <a href="/" class="text-xl font-bold text-primary">Athena</a>
-      </div>
-      <div class="flex-none">
-        <%= if assigns[:current_user] do %>
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <a href="/dashboard" class="btn btn-ghost btn-sm">Dashboard</a>
-            <a href="/niches" class="btn btn-ghost btn-sm">Niches</a>
-            <a href="/brand" class="btn btn-ghost btn-sm">Brand</a>
-            <a href="/posts" class="btn btn-ghost btn-sm">Posts</a>
-            <a href="/posts/new" class="btn btn-ghost btn-sm">Compose</a>
-            <a href="/connections" class="btn btn-ghost btn-sm">Connections</a>
-            <a href="/agent" class="btn btn-ghost btn-sm">Agent</a>
-            <span class="text-sm text-base-content/60">{assigns[:current_user].name}</span>
-            <a href="/auth/logout" class="btn btn-ghost btn-sm text-error">Logout</a>
-          </div>
-        <% else %>
-          <a href="/auth/auth0" class="btn btn-primary btn-sm">Sign in</a>
-        <% end %>
-      </div>
-    </nav>
+    <%= if assigns[:current_user] do %>
+      <div class="drawer">
+        <input id="app-nav-drawer" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content flex min-h-screen flex-col">
+          <nav class="navbar border-b border-base-300 bg-base-200 px-4">
+            <div class="min-w-0 flex-1">
+              <a href="/" class="text-xl font-bold text-primary">Athena</a>
+            </div>
+            <div class="flex flex-none items-center gap-1 sm:gap-2">
+              <label
+                for="app-nav-drawer"
+                class="btn btn-ghost btn-square lg:hidden"
+                aria-label="Open menu"
+              >
+                <.icon name="hero-bars-3" class="size-6" />
+              </label>
+              <div class="hidden flex-wrap items-center justify-end gap-2 lg:flex">
+                <a href="/dashboard" class="btn btn-ghost btn-sm">Dashboard</a>
+                <a href="/niches" class="btn btn-ghost btn-sm">Niches</a>
+                <a href="/brand" class="btn btn-ghost btn-sm">Brand</a>
+                <a href="/posts" class="btn btn-ghost btn-sm">Posts</a>
+                <a href="/posts/new" class="btn btn-ghost btn-sm">Compose</a>
+                <a href="/connections" class="btn btn-ghost btn-sm">Connections</a>
+                <a href="/agent" class="btn btn-ghost btn-sm">Agent</a>
+                <span class="max-w-[10rem] truncate text-sm text-base-content/60">
+                  {assigns[:current_user].name}
+                </span>
+                <a href="/auth/logout" class="btn btn-ghost btn-sm text-error">Logout</a>
+              </div>
+            </div>
+          </nav>
 
-    {@inner_content}
+          {@inner_content}
+        </div>
+
+        <div class="drawer-side z-50 lg:hidden">
+          <label for="app-nav-drawer" class="drawer-overlay" aria-label="Close menu"></label>
+          <aside class="flex min-h-full w-[min(20rem,85vw)] flex-col bg-base-200 text-base-content">
+            <div class="border-b border-base-300 px-4 py-4">
+              <p class="truncate font-semibold">{assigns[:current_user].name}</p>
+              <p class="text-xs text-base-content/50">Signed in</p>
+            </div>
+            <ul class="menu w-full grow p-2">
+              <li>
+                <a href="/dashboard" class="text-base">Dashboard</a>
+              </li>
+              <li>
+                <a href="/niches" class="text-base">Niches</a>
+              </li>
+              <li>
+                <a href="/brand" class="text-base">Brand</a>
+              </li>
+              <li>
+                <a href="/posts" class="text-base">Posts</a>
+              </li>
+              <li>
+                <a href="/posts/new" class="text-base">Compose</a>
+              </li>
+              <li>
+                <a href="/connections" class="text-base">Connections</a>
+              </li>
+              <li>
+                <a href="/agent" class="text-base">Agent</a>
+              </li>
+            </ul>
+            <div class="border-t border-base-300 p-2">
+              <a href="/auth/logout" class="btn btn-ghost btn-block justify-start text-error">
+                Logout
+              </a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    <% else %>
+      <nav class="navbar border-b border-base-300 bg-base-200 px-4">
+        <div class="flex-1">
+          <a href="/" class="text-xl font-bold text-primary">Athena</a>
+        </div>
+        <div class="flex-none">
+          <a href="/auth/auth0" class="btn btn-primary btn-sm">Sign in</a>
+        </div>
+      </nav>
+
+      {@inner_content}
+    <% end %>
   </body>
 </html>
