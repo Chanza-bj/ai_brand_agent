@@ -122,13 +122,13 @@ defmodule AiBrandAgentWeb.PostsLive do
     <div class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold mb-6">Posts</h1>
       
-    <!-- Filters -->
-      <div class="flex gap-2 mb-6">
+    <!-- Filters: wrap on narrow viewports -->
+      <div class="mb-6 flex flex-wrap gap-2">
         <button
           :for={s <- ["all", "draft", "approved", "scheduled", "published", "failed", "discarded"]}
           phx-click="filter"
           phx-value-status={s}
-          class={"btn btn-sm #{if @filter == s, do: "btn-primary", else: "btn-ghost"}"}
+          class={"btn btn-sm shrink-0 #{if @filter == s, do: "btn-primary", else: "btn-ghost"}"}
         >
           {String.capitalize(s)}
         </button>
@@ -139,13 +139,13 @@ defmodule AiBrandAgentWeb.PostsLive do
         No posts match this filter.
       </div>
 
-      <div :for={post <- @posts} class="card bg-base-200 mb-4 p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
+      <div :for={post <- @posts} class="card bg-base-200 mb-4 p-4 sm:p-5">
+        <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex min-w-0 flex-wrap items-center gap-2">
             <span class={"badge #{status_badge_class(post.status)}"}>{post.status}</span>
             <span class="text-sm text-base-content/60">{post.platform}</span>
           </div>
-          <time class="text-xs text-base-content/40">
+          <time class="shrink-0 text-xs text-base-content/40">
             {Calendar.strftime(post.inserted_at, "%b %d, %Y %H:%M")}
           </time>
         </div>
@@ -160,12 +160,12 @@ defmodule AiBrandAgentWeb.PostsLive do
           Error: {post.error_message}
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
           <button
             :if={post.status == "draft"}
             phx-click="approve"
             phx-value-id={post.id}
-            class="btn btn-sm btn-info"
+            class="btn btn-sm btn-info shrink-0"
           >
             Approve
           </button>
@@ -173,7 +173,7 @@ defmodule AiBrandAgentWeb.PostsLive do
             :if={post.status == "approved"}
             phx-click="publish"
             phx-value-id={post.id}
-            class="btn btn-sm btn-success"
+            class="btn btn-sm btn-success shrink-0"
           >
             Publish
           </button>
@@ -181,11 +181,11 @@ defmodule AiBrandAgentWeb.PostsLive do
             :if={post.status == "failed"}
             phx-click="retry"
             phx-value-id={post.id}
-            class="btn btn-sm btn-warning"
+            class="btn btn-sm btn-warning shrink-0"
           >
             Retry
           </button>
-          <.link navigate={~p"/posts/#{post.id}"} class="btn btn-sm btn-ghost">
+          <.link navigate={~p"/posts/#{post.id}"} class="btn btn-sm btn-ghost shrink-0">
             Details
           </.link>
           <a
@@ -196,7 +196,7 @@ defmodule AiBrandAgentWeb.PostsLive do
             href={FacebookClient.public_post_url(post.platform_post_id)}
             target="_blank"
             rel="noopener noreferrer"
-            class="btn btn-sm btn-ghost"
+            class="btn btn-sm btn-ghost min-w-0 max-w-full shrink"
           >
             View on Facebook
           </a>
