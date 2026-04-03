@@ -35,6 +35,9 @@ ai_brand_agent-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Optional local config (see config/dev.secret.exs.example)
+config/dev.secret.exs
+
 # Environment variables (secrets) — commit `.env.example` as a template only (no real values)
 .env
 .env.local

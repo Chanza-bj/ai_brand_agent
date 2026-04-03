@@ -91,3 +91,8 @@ config :phoenix_live_view,
 
 # Log Auth0 token/userinfo shape on /auth/auth0/callback (no secrets). Set false to silence.
 config :ai_brand_agent, :log_auth0_callback_debug, true
+
+# Optional local secrets (gitignored). Copy `config/dev.secret.exs.example` → `config/dev.secret.exs`.
+if File.exists?(Path.join(__DIR__, "dev.secret.exs")) do
+  import_config "dev.secret.exs"
+end

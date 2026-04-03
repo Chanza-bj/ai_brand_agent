@@ -45,3 +45,12 @@ config :phoenix,
 config :ai_brand_agent,
        :auth0_refresh_token_encryption_key,
        :crypto.hash(:sha256, "test-suite-auth0-refresh-token-encryption-key")
+
+# Non-production Auth0 + Gemini values (replace `config.exs` placeholders for tests).
+config :ai_brand_agent, :auth0,
+  domain: "test-tenant.auth0.com",
+  client_id: "test-auth0-client-id",
+  client_secret: "test-auth0-client-secret",
+  audience: "https://test-tenant.auth0.com/api/v2/"
+
+config :ai_brand_agent, :gemini, api_key: "test-gemini-api-key-not-used-in-tests"

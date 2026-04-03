@@ -27,13 +27,15 @@ if port = Env.get("PORT") do
   config :ai_brand_agent, AiBrandAgentWeb.Endpoint, http: [port: String.to_integer(port)]
 end
 
-# Auth0 configuration from environment
-if auth0_domain = Env.get("AUTH0_DOMAIN") do
-  config :ai_brand_agent, :auth0,
-    domain: auth0_domain,
-    client_id: Env.get!("AUTH0_CLIENT_ID"),
-    client_secret: Env.get!("AUTH0_CLIENT_SECRET"),
-    audience: Env.get("AUTH0_AUDIENCE") || "https://#{auth0_domain}/api/v2/"
+# Auth0 configuration from environment (not applied in :test — test.exs uses fixed values)
+if config_env() != :test do
+  if auth0_domain = Env.get("AUTH0_DOMAIN") do
+    config :ai_brand_agent, :auth0,
+      domain: auth0_domain,
+      client_id: Env.get!("AUTH0_CLIENT_ID"),
+      client_secret: Env.get!("AUTH0_CLIENT_SECRET"),
+      audience: Env.get("AUTH0_AUDIENCE") || "https://#{auth0_domain}/api/v2/"
+  end
 end
 
 if fb_scope = Env.get("AUTH0_FACEBOOK_CONNECTION_SCOPE") do
@@ -61,38 +63,42 @@ token_vault_config =
     _ -> nil
   end
 
-if token_vault_config do
+if config_env() != :test and token_vault_config do
   config :ai_brand_agent, :token_vault, token_vault_config
 end
 
 # Gemini API key from environment (merge so retry/backoff keys from config.exs stay available)
-if gemini_key = Env.get("GEMINI_API_KEY") do
-  prior = Application.get_env(:ai_brand_agent, :gemini) || []
+if config_env() != :test do
+  if gemini_key = Env.get("GEMINI_API_KEY") do
+    prior = Application.get_env(:ai_brand_agent, :gemini) || []
 
-  config :ai_brand_agent,
-         :gemini,
-         Keyword.merge(prior,
-           api_key: gemini_key,
-           model: Env.get("GEMINI_MODEL") || Keyword.get(prior, :model, "gemini-1.5-flash")
-         )
+    config :ai_brand_agent,
+           :gemini,
+           Keyword.merge(prior,
+             api_key: gemini_key,
+             model: Env.get("GEMINI_MODEL") || Keyword.get(prior, :model, "gemini-1.5-flash")
+           )
+  end
 end
 
 # Optional: encrypt `users.auth0_refresh_token` at rest (Base64-encoded 32-byte key, AES-256-GCM).
-case Env.get("AUTH0_REFRESH_TOKEN_ENCRYPTION_KEY") do
-  key_b64 when is_binary(key_b64) and key_b64 != "" ->
-    decoded = Base.decode64!(String.trim(key_b64))
+if config_env() != :test do
+  case Env.get("AUTH0_REFRESH_TOKEN_ENCRYPTION_KEY") do
+    key_b64 when is_binary(key_b64) and key_b64 != "" ->
+      decoded = Base.decode64!(String.trim(key_b64))
 
-    if byte_size(decoded) != 32 do
-      raise """
-      AUTH0_REFRESH_TOKEN_ENCRYPTION_KEY must be Base64 that decodes to exactly 32 bytes (AES-256).
-      Generate e.g.: openssl rand -base64 32
-      """
-    end
+      if byte_size(decoded) != 32 do
+        raise """
+        AUTH0_REFRESH_TOKEN_ENCRYPTION_KEY must be Base64 that decodes to exactly 32 bytes (AES-256).
+        Generate e.g.: openssl rand -base64 32
+        """
+      end
 
-    config :ai_brand_agent, :auth0_refresh_token_encryption_key, decoded
+      config :ai_brand_agent, :auth0_refresh_token_encryption_key, decoded
 
-  _ ->
-    :ok
+    _ ->
+      :ok
+  end
 end
 
 if config_env() == :prod do

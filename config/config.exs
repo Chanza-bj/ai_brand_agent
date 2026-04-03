@@ -96,23 +96,30 @@ config :ai_brand_agent, :google_connected_accounts_scopes, [
   "https://www.googleapis.com/auth/calendar.events"
 ]
 
-# Auth0 configuration (override in runtime.exs with env vars)
+# Auth0 — do not commit real credentials here.
+#
+# * **Production / releases:** `config/runtime.exs` sets Auth0 from `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`,
+#   `AUTH0_CLIENT_SECRET`, and optional `AUTH0_AUDIENCE` when those env vars are present (they override
+#   the placeholders below).
+# * **CI/CD:** Replace the `__AUTH0_*__` placeholders in this file in your pipeline before `mix release`,
+#   or inject secrets only via env + runtime.exs (preferred).
+# * **Local dev:** Copy `config/dev.secret.exs.example` to `config/dev.secret.exs` (gitignored) and fill in
+#   real values; `config/dev.exs` imports that file when it exists.
 config :ai_brand_agent, :auth0,
-  domain: "dev-677l58koldj2zef6.us.auth0.com",
-  client_id: "YhMo6wJk3vrdzj4q1FVvgFbjydr7zQPg",
-  client_secret: "CAhNLwh-GF4SdgpXV_zPw_K8Nxc0l9JIy6Iqg2SDc_bKegT6msevlkkC_HXKjuT-",
-  audience: "https://dev-677l58koldj2zef6.us.auth0.com/api/v2/"
+  domain: "__AUTH0_DOMAIN__",
+  client_id: "__AUTH0_CLIENT_ID__",
+  client_secret: "__AUTH0_CLIENT_SECRET__",
+  audience: "__AUTH0_AUDIENCE__"
 
 # Auth0 Token Vault (Privileged Worker flow)
 # Configure in runtime.exs via AUTH0_TOKEN_VAULT_PRIVATE_KEY (PEM string) or
 # AUTH0_TOKEN_VAULT_PRIVATE_KEY_PATH (file path).
 # See: https://auth0.com/docs/secure/tokens/token-vault/privileged-worker-token-exchange-with-token-vault
 
-# Gemini API configuration
-# See `Gemini` env vars in `runtime.exs` for production. Rate limits: free tier is strict;
-# increase backoff and snooze below, or use a paid Gemini tier / fewer scheduled jobs.
+# Gemini API — do not commit a real API key here. Use `__GEMINI_API_KEY__` (replaced in CI) or
+# `GEMINI_API_KEY` at runtime (`config/runtime.exs` merges it when set).
 config :ai_brand_agent, :gemini,
-  api_key: "AIzaSyDNt4Qj4lV6OZBCt9Qr25WfEk-ZkOmHEEA",
+  api_key: "__GEMINI_API_KEY__",
   model: "gemini-2.5-flash",
   # HTTP 429 retries (inside LLMClient; keep total wait under ContentAgent GenServer timeout)
   max_retries: 4,
@@ -128,4 +135,3 @@ config :ai_brand_agent, :trend_fetcher, AiBrandAgent.Trends.LlmFetcher
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
-# mix run priv/scripts/register_credential.exs
