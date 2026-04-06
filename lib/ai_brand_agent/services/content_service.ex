@@ -250,6 +250,17 @@ defmodule AiBrandAgent.Services.ContentService do
   end
 
   @doc """
+  Records that the Gmail \"draft ready\" notification was sent (idempotent marker).
+  """
+  def mark_draft_ready_email_sent(%Post{} = post) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    post
+    |> Post.changeset(%{draft_ready_email_sent_at: now})
+    |> Repo.update()
+  end
+
+  @doc """
   Delete draft posts older than `hours` hours.
 
   Returns `{count, nil}` with the number of deleted rows.

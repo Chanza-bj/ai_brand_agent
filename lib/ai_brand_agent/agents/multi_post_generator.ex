@@ -1,7 +1,8 @@
 defmodule AiBrandAgent.Agents.MultiPostGenerator do
   @moduledoc """
   Generates three style variants per topic/platform, ranks them, discards losers,
-  then **always** auto-approves the winner and schedules it (subject to daily cap + calendar).
+  then leaves the **winning draft** for the user. A **draft-ready** Gmail notification is
+  always attempted (`DraftReadyEmail`) so they can open the app to approve, Smart Schedule, or publish.
   """
 
   require Logger
@@ -10,7 +11,7 @@ defmodule AiBrandAgent.Agents.MultiPostGenerator do
   alias AiBrandAgent.Agents.CandidateRanker
   alias AiBrandAgent.Agents.ContentAgent
   alias AiBrandAgent.Agents.EngagementInsights
-  alias AiBrandAgent.Agents.ScheduleResolver
+  alias AiBrandAgent.Notifications.DraftReadyEmail
   alias AiBrandAgent.Services.ContentService
 
   @variants [
@@ -87,33 +88,24 @@ defmodule AiBrandAgent.Agents.MultiPostGenerator do
     :ok
   end
 
-  defp automate_winner(winner, user_id) do
+  defp automate_winner(winner, _user_id) do
     winner = ContentService.get_post(winner.id) || winner
 
-    case ContentService.approve_post(winner) do
-      {:ok, approved} ->
-        _ = Accounts.log_agent_decision(user_id, approved.id, "auto_approve", %{})
+    case DraftReadyEmail.send_for_post(winner) do
+      {:ok, :sent} ->
+        {:ok, winner}
 
-        case ScheduleResolver.schedule_approved_post(approved.id, user_id) do
-          {:ok, %{scheduled_at: slot} = info} ->
-            _ =
-              Accounts.log_agent_decision(user_id, approved.id, "auto_scheduled", %{
-                scheduled_at: DateTime.to_iso8601(slot),
-                calendar_event_id: Map.get(info, :calendar_event_id)
-              })
+      {:ok, :already_sent} ->
+        {:ok, winner}
 
-            {:ok, approved}
-
-          {:error, :daily_cap} ->
-            {:ok, approved}
-
-          {:error, reason} ->
-            Logger.warning("MultiPostGenerator: schedule failed #{inspect(reason)}")
-            {:ok, approved}
-        end
+      {:ok, :skipped} ->
+        {:ok, winner}
 
       {:error, reason} ->
-        Logger.warning("MultiPostGenerator: approve failed #{inspect(reason)}")
+        Logger.warning(
+          "MultiPostGenerator: draft ready notification failed post=#{winner.id} reason=#{inspect(reason)}"
+        )
+
         {:ok, winner}
     end
   end

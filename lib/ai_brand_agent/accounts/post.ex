@@ -25,6 +25,7 @@ defmodule AiBrandAgent.Accounts.Post do
     field :error_message, :string
     field :variant_index, :integer
     field :style_tag, :string
+    field :draft_ready_email_sent_at, :utc_datetime
 
     belongs_to :user, AiBrandAgent.Accounts.User
     belongs_to :topic, AiBrandAgent.Accounts.Topic
@@ -46,7 +47,8 @@ defmodule AiBrandAgent.Accounts.Post do
       :topic_id,
       :generation_run_id,
       :variant_index,
-      :style_tag
+      :style_tag,
+      :draft_ready_email_sent_at
     ])
     |> validate_required([:platform, :content, :status, :user_id])
     |> validate_inclusion(:platform, ["linkedin", "facebook"])

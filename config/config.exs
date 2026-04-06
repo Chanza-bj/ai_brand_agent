@@ -93,7 +93,8 @@ config :ai_brand_agent, :google_connected_accounts_scopes, [
   "openid",
   "profile",
   "email",
-  "https://www.googleapis.com/auth/calendar.events"
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/gmail.send"
 ]
 
 # Auth0 — do not commit real credentials here.

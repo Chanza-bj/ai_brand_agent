@@ -19,6 +19,12 @@ defmodule AiBrandAgentWeb.ErrorMessage do
   def post_action({:not_editable, _status}), do: "This post can't be edited."
   def post_action(:daily_cap), do: "Daily publishing limit reached for today."
   def post_action(:no_slot), do: "No available time slot. Adjust your schedule in Agent settings."
+  def post_action(:schedule_in_past), do: "Pick a date and time in the future."
+
+  def post_action(:invalid_local_time),
+    do: "That date and time is not valid in your timezone (e.g. DST gap). Try another time."
+
+  def post_action(:invalid_datetime), do: "Enter a valid date and time for scheduling."
   def post_action(_), do: generic()
 
   def login_failed, do: "Sign-in failed. Please try again or contact support if it continues."

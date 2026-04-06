@@ -7,7 +7,7 @@ defmodule AiBrandAgentWeb.PageController do
         render(conn, :home,
           page_title: "Athena: Personal brand on autopilot",
           meta_description:
-            "Define your niches and keywords, get topic ideas and on-brand drafts for LinkedIn and Facebook, optionally highlight your product or service, and publish with OAuth secured in Auth0 Token Vault.",
+            "Define your niches and keywords, get topic ideas and on-brand drafts for LinkedIn and Facebook. Approve drafts, use Smart Schedule from your Agent settings or publish now, with OAuth secured in Auth0 Token Vault.",
           canonical_url: url(conn, ~p"/")
         )
 

@@ -4,6 +4,24 @@ Phoenix app **Athena**: trend discovery, **Gemini** content generation, and sche
 
 ---
 
+## Posting flow (draft → approve → schedule or publish)
+
+This is the end-to-end path for **AI-generated** posts (manual compose at `/posts/new` follows the same **approve / schedule / publish** steps once a draft exists).
+
+1. **Draft only after generation** — Multi-variant runs keep a single **winning draft**; other variants are discarded. Nothing is auto-approved or auto-scheduled.
+
+2. **Draft-ready email (required step)** — After each winning draft, the app **always attempts** to send a **“draft ready”** message via the **Gmail API** using the same **Token Vault** Google access token as Calendar (**no SMTP** in this app). You must connect Google with **`gmail.send`** (see Google setup below) so notification delivery works; a timestamp on the post prevents duplicate sends on retries.
+
+3. **Review in the app** — Open **Posts** (or use the link from email). **Edit** if needed, then **Approve** when the copy is ready.
+
+4. **Smart Schedule** — For **approved** posts, **Smart Schedule** does **not** ask you to pick a date/time manually. It uses **`ScheduleResolver`**: your **Agent** settings at `/agent` (IANA **timezone**, **posting weekdays**, **default time**), optional synced **“posting slots”** on **Google Calendar**, and a **daily cap** (3 publishes per local calendar day). The next valid slot is chosen and a background job runs at that time.
+
+5. **Publish now** — Queues publishing right away. If the post is still a **draft**, the app **approves** it first, then enqueues the publish worker.
+
+6. **Execution** — **`PublishWorker`** / **`PostAgent`** send to LinkedIn or Facebook using Auth0-linked provider tokens; posts end as **published** or **failed** (with retry where applicable).
+
+---
+
 ## Prerequisites
 
 | Requirement | Notes |
@@ -80,6 +98,8 @@ To plug in a different source (News API, RSS, etc.), implement `AiBrandAgent.Tre
    if you use the default dev port **4001**.
 
 6. **Re-authenticate** users after changing connection purpose or Vault settings so federated tokens are stored correctly.
+
+7. **Gmail (draft notifications)** — The app requests `https://www.googleapis.com/auth/gmail.send` alongside Calendar so “draft ready” emails can be sent via the Gmail API using the same Token Vault Google access token. After adding this scope, users must **re-connect Google** (Connected Accounts / login) so new tokens include `gmail.send`; otherwise sends may return 403 until consent is refreshed.
 
 **Docs:** [Configure Token Vault](https://auth0.com/docs/secure/call-apis-on-users-behalf/token-vault/configure-token-vault) · [Google for AI Agents](https://auth0.com/ai/docs/integrations/google)
 

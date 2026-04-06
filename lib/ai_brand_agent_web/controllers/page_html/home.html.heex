@@ -46,6 +46,9 @@
               <a href="#how-it-works" class="btn btn-outline btn-lg rounded-xl border-base-300">
                 How it works
               </a>
+              <a href="#posting-flow" class="btn btn-outline btn-lg rounded-xl border-base-300">
+                Posting flow
+              </a>
             <% end %>
           </div>
 
@@ -163,6 +166,85 @@
         </p>
       </li>
     </ol>
+  </section>
+
+  <%!-- Posting flow (draft → approve → schedule or publish) --%>
+  <section id="posting-flow" class="scroll-mt-20 border-y border-base-300/60 bg-base-200/25">
+    <div class="max-w-6xl mx-auto px-4 py-16 sm:py-20">
+      <div class="marketing-scroll-reveal text-center mb-12" data-scroll-reveal>
+        <h2 class="text-2xl sm:text-3xl font-bold text-base-content mb-3">
+          Posting flow
+        </h2>
+        <p class="text-base-content/60 max-w-2xl mx-auto">
+          AI drafts stay in your control: you get a <span class="text-base-content/80">draft-ready</span> email, then approve when ready and schedule using your Agent settings or publish immediately.
+        </p>
+      </div>
+
+      <ol class="space-y-6 max-w-3xl mx-auto">
+        <li
+          class="marketing-scroll-reveal flex gap-4 text-left"
+          data-scroll-reveal
+          style="--marketing-reveal-delay: 0ms"
+        >
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
+            1
+          </span>
+          <div>
+            <h3 class="font-semibold text-base-content mb-1">Draft after generation</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              The winning copy stays a <span class="text-base-content/80">draft</span>; extra variants are discarded. Nothing auto-publishes.
+            </p>
+          </div>
+        </li>
+        <li
+          class="marketing-scroll-reveal flex gap-4 text-left"
+          data-scroll-reveal
+          style="--marketing-reveal-delay: 80ms"
+        >
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
+            2
+          </span>
+          <div>
+            <h3 class="font-semibold text-base-content mb-1">“Draft ready” email (required)</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              Every winning draft triggers a Gmail notification via Token Vault (<code class="text-xs bg-base-300/50 px-1 rounded">gmail.send</code>)—no SMTP in the app. Connect Google so the send succeeds; open Posts or use the link from your inbox.
+            </p>
+          </div>
+        </li>
+        <li
+          class="marketing-scroll-reveal flex gap-4 text-left"
+          data-scroll-reveal
+          style="--marketing-reveal-delay: 160ms"
+        >
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
+            3
+          </span>
+          <div>
+            <h3 class="font-semibold text-base-content mb-1">Approve, then choose</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              Edit if needed, then <span class="text-base-content/80">Approve</span>. Use <span class="text-base-content/80">Smart Schedule</span> to pick the next slot from your
+              <a href={~p"/agent"} class="link link-primary">Agent settings</a>
+              (timezone, weekdays, default time) and optional Google Calendar posting slots—or <span class="text-base-content/80">Publish now</span> to queue immediately.
+            </p>
+          </div>
+        </li>
+        <li
+          class="marketing-scroll-reveal flex gap-4 text-left"
+          data-scroll-reveal
+          style="--marketing-reveal-delay: 240ms"
+        >
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-content text-sm font-bold">
+            4
+          </span>
+          <div>
+            <h3 class="font-semibold text-base-content mb-1">Publish</h3>
+            <p class="text-sm text-base-content/60 leading-relaxed">
+              Background jobs send to LinkedIn or Facebook via Auth0-linked tokens. Scheduled runs fire at the time you chose through Smart Schedule.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
   </section>
 
   <%!-- Feature cards --%>

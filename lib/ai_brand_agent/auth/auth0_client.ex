@@ -253,7 +253,8 @@ defmodule AiBrandAgent.Auth.Auth0Client do
         "openid",
         "profile",
         "email",
-        "https://www.googleapis.com/auth/calendar.events"
+        "https://www.googleapis.com/auth/calendar.events",
+        "https://www.googleapis.com/auth/gmail.send"
       ]
   end
 
