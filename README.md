@@ -10,7 +10,7 @@ This is the end-to-end path for **AI-generated** posts (manual compose at `/post
 
 1. **Draft only after generation** — Multi-variant runs keep a single **winning draft**; other variants are discarded. Nothing is auto-approved or auto-scheduled.
 
-2. **Draft-ready email (required step)** — After each winning draft, the app **always attempts** to send a **“draft ready”** message via the **Gmail API** using the same **Token Vault** Google access token as Calendar (**no SMTP** in this app). You must connect Google with **`gmail.send`** (see Google setup below) so notification delivery works; a timestamp on the post prevents duplicate sends on retries.
+2. **Draft-ready email (required step)** — After each winning draft, the app **always attempts** to send a **“draft ready”** message via the **Gmail API** using the same **Token Vault** Google access token as Calendar (**no SMTP** in this app). You must connect Google with **`gmail.send`** and **`gmail.metadata`** (see Google setup below) so notification delivery works; a timestamp on the post prevents duplicate sends on retries.
 
 3. **Review in the app** — Open **Posts** (or use the link from email). **Edit** if needed, then **Approve** when the copy is ready.
 
@@ -99,7 +99,9 @@ To plug in a different source (News API, RSS, etc.), implement `AiBrandAgent.Tre
 
 6. **Re-authenticate** users after changing connection purpose or Vault settings so federated tokens are stored correctly.
 
-7. **Gmail (draft notifications)** — The app requests `https://www.googleapis.com/auth/gmail.send` alongside Calendar so “draft ready” emails can be sent via the Gmail API using the same Token Vault Google access token. After adding this scope, users must **re-connect Google** (Connected Accounts / login) so new tokens include `gmail.send`; otherwise sends may return 403 until consent is refreshed.
+7. **Gmail (draft notifications)** — The app requests `https://www.googleapis.com/auth/gmail.send` and `https://www.googleapis.com/auth/gmail.metadata` alongside Calendar. **`gmail.send`** is for `messages.send`; **`gmail.metadata`** is required for `users.getProfile` (sender email address). Without both, Google returns **403** `ACCESS_TOKEN_SCOPE_INSUFFICIENT` on profile. After adding scopes, users must **re-connect Google** (Connected Accounts / login) so new tokens include them; otherwise sends may return 403 until consent is refreshed.
+
+   **Enable the Gmail API in Google Cloud:** In [Google Cloud Console](https://console.cloud.google.com/) open the **same project** used for your Google OAuth client (Auth0 Google connection / consent screen). **APIs & Services → Enable APIs** → enable **Gmail API**. If it stays disabled, calls return **403** with `SERVICE_DISABLED` / `accessNotConfigured` (“Gmail API has not been used in project … or it is disabled”). Wait a few minutes after enabling, then retry.
 
 **Docs:** [Configure Token Vault](https://auth0.com/docs/secure/call-apis-on-users-behalf/token-vault/configure-token-vault) · [Google for AI Agents](https://auth0.com/ai/docs/integrations/google)
 

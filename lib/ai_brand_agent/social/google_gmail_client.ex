@@ -2,8 +2,14 @@ defmodule AiBrandAgent.Social.GoogleGmailClient do
   @moduledoc """
   Minimal Gmail API client for sending mail via `users.messages.send`.
 
-  Requires OAuth scope `https://www.googleapis.com/auth/gmail.send` on the access token
-  (same Google connection as Calendar / Token Vault).
+  Sender address resolution:
+
+  1. **`users.getProfile`** (Gmail) — needs `gmail.metadata` (or broader Gmail read scopes).
+  2. **Fallback:** **`GET https://www.googleapis.com/oauth2/v3/userinfo`** — works when the
+     federated token includes **`openid` / `email` / `profile`** (typical for Connected Accounts),
+     so mail still sends even if the token was issued **before** `gmail.metadata` was added.
+
+  Sending requires **`https://www.googleapis.com/auth/gmail.send`** on the access token.
   """
 
   require Logger
@@ -11,21 +17,70 @@ defmodule AiBrandAgent.Social.GoogleGmailClient do
   alias AiBrandAgent.Logging
 
   @base_url "https://gmail.googleapis.com/gmail/v1"
+  @oauth2_userinfo_url "https://www.googleapis.com/oauth2/v3/userinfo"
 
   @doc """
-  Returns `{:ok, email_address}` for the authenticated user (`users/me/profile`).
+  Returns `{:ok, email_address}` for the authenticated Google account.
+
+  Tries Gmail `users/me/profile` first, then OAuth2 `userinfo` (same bearer token).
   """
-  def get_profile_email(access_token) when is_binary(access_token) do
-    case Req.get("#{@base_url}/users/me/profile", headers: auth_headers(access_token)) do
-      {:ok, %{status: 200, body: %{"emailAddress" => email}}} when is_binary(email) ->
+  def get_sender_email(access_token) when is_binary(access_token) do
+    case gmail_profile_email(access_token) do
+      {:ok, email} ->
         {:ok, email}
 
+      {:error, {:gmail_profile_error, status}} when status in [401, 403] ->
+        Logger.debug(
+          "GoogleGmailClient: Gmail profile #{status}, trying OAuth2 userinfo for sender email"
+        )
+
+        oauth2_user_email(access_token)
+
+      {:error, _} = err ->
+        err
+    end
+  end
+
+  @doc false
+  def get_profile_email(access_token) when is_binary(access_token) do
+    get_sender_email(access_token)
+  end
+
+  defp gmail_profile_email(access_token) do
+    case Req.get("#{@base_url}/users/me/profile", headers: auth_headers(access_token)) do
+      {:ok, %{status: 200, body: %{"emailAddress" => email}}} when is_binary(email) ->
+        {:ok, String.trim(email)}
+
       {:ok, %{status: status, body: body}} ->
-        Logger.error(
-          "Google Gmail get_profile error status=#{status} body=#{Logging.safe_http_body(body)}"
+        Logger.debug(
+          "Google Gmail get_profile status=#{status} body=#{Logging.safe_http_body(body)}"
         )
 
         {:error, {:gmail_profile_error, status}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp oauth2_user_email(access_token) do
+    case Req.get(@oauth2_userinfo_url, headers: auth_headers(access_token)) do
+      {:ok, %{status: 200, body: body}} when is_map(body) ->
+        case body["email"] do
+          email when is_binary(email) and email != "" ->
+            {:ok, String.trim(email)}
+
+          _ ->
+            Logger.warning("GoogleGmailClient: OAuth2 userinfo returned no email field")
+            {:error, :oauth2_userinfo_no_email}
+        end
+
+      {:ok, %{status: status, body: body}} ->
+        Logger.warning(
+          "Google OAuth2 userinfo error status=#{status} body=#{Logging.safe_http_body(body)}"
+        )
+
+        {:error, {:oauth2_userinfo_error, status}}
 
       {:error, reason} ->
         {:error, reason}
@@ -41,7 +96,7 @@ defmodule AiBrandAgent.Social.GoogleGmailClient do
         body: body
       })
       when is_binary(access_token) and is_binary(to) and is_binary(subject) and is_binary(body) do
-    with {:ok, from} <- get_profile_email(access_token) do
+    with {:ok, from} <- get_sender_email(access_token) do
       raw = build_rfc2822(from, to, subject, body)
       enc = Base.url_encode64(raw, padding: false)
 

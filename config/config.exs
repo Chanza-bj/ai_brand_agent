@@ -94,7 +94,9 @@ config :ai_brand_agent, :google_connected_accounts_scopes, [
   "profile",
   "email",
   "https://www.googleapis.com/auth/calendar.events",
-  "https://www.googleapis.com/auth/gmail.send"
+  "https://www.googleapis.com/auth/gmail.send",
+  # Required for `users.getProfile` (sender address); `gmail.send` alone does not cover it.
+  "https://www.googleapis.com/auth/gmail.metadata"
 ]
 
 # Auth0 — do not commit real credentials here.
